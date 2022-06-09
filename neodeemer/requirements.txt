@@ -2,11 +2,11 @@ ffpyplayer
 kivy
 kivymd
 music_tag
-git+https://github.com/kivy/plyer@master
+https://github.com/kivy/plyer/archive/master.tar.gz
 python-dotenv
-git+https://github.com/JosiasAurel/pytube@patch-regex
+https://github.com/JosiasAurel/pytube/archive/patch-regex.tar.gz
 requests
 spotipy
 unidecode
-git+https://github.com/ytdl-org/youtube-dl@master
+https://github.com/ytdl-org/youtube-dl/archive/master.tar.gz
 youtube_search
