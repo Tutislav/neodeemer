@@ -27,12 +27,19 @@ jobs:
           echo SPOTIPY_CLIENT_SECRET="$SPOTIPY_CLIENT_SECRET" >> neodeemer/.env
           echo YOUTUBE_API_KEY="$YOUTUBE_API_KEY" >> neodeemer/.env
 
+      - name: Download dependencies
+        shell: cmd
+        run: |
+          python -m pip install pyinstaller
+          python -m pip install -r neodeemer/requirements.txt
+          curl -L https://downloads.fdossena.com/geth.php?r=mesa64-latest --output mesa.7z
+          7z e mesa.7z opengl32.dll -o"neodeemer"
+
       - name: Build with PyInstaller
         shell: cmd
         run: |
           cd neodeemer
-          python -m pip install pyinstaller
-          python -m pip install -r requirements.txt
+          set KIVY_GL_BACKEND=angle_sdl2
           python -m PyInstaller neodeemer.spec
 
       - name: Upload a Build Artifact

@@ -24,7 +24,7 @@ pyz = PYZ(a.pure, a.zipped_data, cipher=block_cipher)
 
 exe = EXE(
     pyz,
-    Tree('.', excludes=['build', 'dist', 'p4a', 'venv']),
+    Tree('.', excludes=['build', 'dist', 'p4a', 'venv', 'opengl32.dll']),
     a.scripts,
     a.binaries,
     a.zipfiles,
