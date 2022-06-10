@@ -10,31 +10,32 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
 
     steps:
       - name: Checkout
         uses: actions/checkout@v3.0.2
 
       - name: Create .env file
-        shell: bash
+        shell: cmd
         env:
           SPOTIPY_CLIENT_ID: ${{ secrets.SPOTIPY_CLIENT_ID }}
           SPOTIPY_CLIENT_SECRET: ${{ secrets.SPOTIPY_CLIENT_SECRET }}
           YOUTUBE_API_KEY: ${{ secrets.YOUTUBE_API_KEY }}
         run: |
-          touch neodeemer/.env
           echo SPOTIPY_CLIENT_ID="$SPOTIPY_CLIENT_ID" >> neodeemer/.env
           echo SPOTIPY_CLIENT_SECRET="$SPOTIPY_CLIENT_SECRET" >> neodeemer/.env
           echo YOUTUBE_API_KEY="$YOUTUBE_API_KEY" >> neodeemer/.env
 
       - name: Build with PyInstaller
-        uses: JackMcKew/pyinstaller-action-windows@v0.1.2
-        with:
-          path: neodeemer
-          spec: neodeemer.spec
+        shell: cmd
+        run: |
+          cd neodeemer
+          python -m pip install pyinstaller
+          python -m pip install -r requirements.txt
+          python -m PyInstaller neodeemer.spec
 
       - name: Upload a Build Artifact
         uses: actions/upload-artifact@v3.1.0
         with:
-          path: neodeemer/dist/windows
+          path: neodeemer/dist
