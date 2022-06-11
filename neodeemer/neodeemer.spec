@@ -10,7 +10,7 @@ a = Analysis(
     pathex=[],
     binaries=[],
     datas=[],
-    hiddenimports=[],
+    hiddenimports=['plyer.platforms.win.notification'],
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],
@@ -20,11 +20,15 @@ a = Analysis(
     cipher=block_cipher,
     noarchive=False,
 )
+a.binaries -= TOC([
+    ('opengl32.dll', None, None),
+    ('OPENGL32.dll', None, None)
+])
 pyz = PYZ(a.pure, a.zipped_data, cipher=block_cipher)
 
 exe = EXE(
     pyz,
-    Tree('.', excludes=['build', 'dist', 'p4a', 'venv', 'opengl32.dll']),
+    Tree('.', excludes=['build', 'dist', 'p4a', 'venv', 'opengl32.dll', 'OPENGL32.dll']),
     a.scripts,
     a.binaries,
     a.zipfiles,

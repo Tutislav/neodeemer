@@ -23,9 +23,9 @@ jobs:
           SPOTIPY_CLIENT_SECRET: ${{ secrets.SPOTIPY_CLIENT_SECRET }}
           YOUTUBE_API_KEY: ${{ secrets.YOUTUBE_API_KEY }}
         run: |
-          echo SPOTIPY_CLIENT_ID="$SPOTIPY_CLIENT_ID" >> neodeemer/.env
-          echo SPOTIPY_CLIENT_SECRET="$SPOTIPY_CLIENT_SECRET" >> neodeemer/.env
-          echo YOUTUBE_API_KEY="$YOUTUBE_API_KEY" >> neodeemer/.env
+          echo SPOTIPY_CLIENT_ID="%SPOTIPY_CLIENT_ID%" >> neodeemer/.env
+          echo SPOTIPY_CLIENT_SECRET="%SPOTIPY_CLIENT_SECRET%" >> neodeemer/.env
+          echo YOUTUBE_API_KEY="%YOUTUBE_API_KEY%" >> neodeemer/.env
 
       - name: Download dependencies
         shell: cmd

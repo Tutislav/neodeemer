@@ -13,7 +13,7 @@ from kivy.core.audio import SoundLoader
 from kivy.core.window import Window
 from kivy.metrics import dp
 from kivy.properties import DictProperty
-from kivy.resources import resource_add_path
+from kivy.resources import resource_add_path, resource_find
 from kivy.uix.image import AsyncImage
 from kivy.uix.screenmanager import Screen, ScreenManager
 from kivy.utils import platform
@@ -434,9 +434,9 @@ class Neodeemer(MDApp):
         self.download_queue_info["downloaded_b"] = 0
         self.download_queue_info["total_b"] = 0
         if (platform == "win"):
-            icon_path = "data/icon.ico"
+            icon_path = resource_find("data/icon.ico")
         else:
-            icon_path = "data/icon.png"
+            icon_path = resource_find("data/icon.png")
         notification.notify(title=self.loc.get("Download completed"), message=self.loc.get("Downloaded ") + str(tracks_count) + self.loc.get(" songs"), app_name=self.loc.TITLE, app_icon=icon_path)
     
     def progressbar_update(self, *args):
