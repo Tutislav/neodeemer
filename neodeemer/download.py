@@ -41,6 +41,18 @@ class Download():
             except OSError:
                 pass
 
+    def playlist_file_save(self):
+        if "playlist_name" in self.track_dict:
+            if self.track_dict["forcedmp3"]:
+                file_path = self.track_dict["file_path2"]
+            else:
+                file_path = self.track_dict["file_path"]
+            file_path = os.path.relpath(file_path, self.spotifyloader.music_folder_path)
+            with open(self.track_dict["playlist_file_path"], "a+", encoding="utf-8") as playlist_file:
+                playlist_file.seek(0)
+                if not file_path + "\n" in playlist_file.readlines():
+                    playlist_file.write(file_path + "\n")
+    
     def save_tags(self):
         self.track_dict["state"] = TrackStates.TAGSAVING
         try:
@@ -68,10 +80,7 @@ class Download():
         else:
             self.track_dict["state"] = TrackStates.COMPLETED
             self.download_queue_info["position"] += 1
-            if "playlist_name" in self.track_dict:
-                with open(self.track_dict["playlist_file_path"], "a+", encoding="utf-8") as playlist_file:
-                    if not file_path in playlist_file.readlines():
-                        playlist_file.write(file_path + "\n")
+            self.playlist_file_save()
 
     def download_file(self, url, file_path):
         with open(file_path, "wb") as file:

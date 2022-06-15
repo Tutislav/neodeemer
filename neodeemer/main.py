@@ -19,6 +19,7 @@ from kivy.uix.screenmanager import Screen, ScreenManager
 from kivy.utils import platform
 from kivymd.app import MDApp
 from kivymd.uix.boxlayout import MDBoxLayout
+from kivymd.uix.floatlayout import MDFloatLayout
 from kivymd.uix.button import MDFlatButton
 from kivymd.uix.dialog import MDDialog
 from kivymd.uix.filemanager import MDFileManager
@@ -37,7 +38,7 @@ from tools import TrackStates, submit_bugs, track_file_state
 
 __version__ = "0.2"
 
-class Loading(MDBoxLayout):
+class Loading(MDFloatLayout):
     pass
 
 class AsyncImageLeftWidget(ILeftBody, AsyncImage):
@@ -93,6 +94,7 @@ class Neodeemer(MDApp):
         "downloaded_b": 0,
         "total_b": 0
     }
+    playlist_queue = []
     sound = None
 
     def build(self):
@@ -141,13 +143,14 @@ class Neodeemer(MDApp):
     
     def on_start(self):
         self.tab_switch(self.tracks_tab)
-        self.s = SpotifyLoader(self.music_folder_path, self.create_subfolders, self.loc.get_market())
-        self.y = YoutubeLoader(self.music_folder_path, self.create_subfolders)
+        self.loading = MDDialog(type="custom", content_cls=Loading(), md_bg_color=(0, 0, 0, 0))
+        self.label_loading_info = self.loading.children[0].children[2].children[0].ids.label_loading_info
+        self.s = SpotifyLoader(self.music_folder_path, self.create_subfolders, self.label_loading_info, self.loc.get_market())
+        self.y = YoutubeLoader(self.music_folder_path, self.create_subfolders, self.label_loading_info)
         self.watchdog = Thread()
         self.play_track = Thread()
         for i in range(1, 6):
             globals()[f"download_tracks_{i}"] = Thread()
-        self.loading = MDDialog(type="custom", content_cls=Loading(), md_bg_color=(0, 0, 0, 0))
         self.check_create_subfolders = self.screens[4].ids.check_create_subfolders
         self.text_music_folder_path = self.screens[4].ids.text_music_folder_path
         self.text_localization = self.screens[4].ids.text_localization
@@ -349,6 +352,8 @@ class Neodeemer(MDApp):
         for track in self.selected_tracks:
             if track["state"] != TrackStates.COMPLETED:
                 self.download_queue.append(track)
+            else:
+                self.playlist_queue.append(track)
         self.selected_tracks = []
         if self.screen_cur.name == "SpotifyScreen":
             mdlist_tracks = self.tracks_tab.ids.mdlist_tracks
@@ -424,6 +429,8 @@ class Neodeemer(MDApp):
         Clock.schedule_once(self.loading.dismiss)
     
     def watchdog_progress(self):
+        for track in self.playlist_queue:
+            Download(track, self.s, self.download_queue_info).playlist_file_save()
         while self.download_queue_info["position"] != len(self.download_queue):
             Clock.schedule_once(self.progressbar_update)
             sleep(0.25)
@@ -433,6 +440,7 @@ class Neodeemer(MDApp):
         self.download_queue_info["position"] = 0
         self.download_queue_info["downloaded_b"] = 0
         self.download_queue_info["total_b"] = 0
+        self.playlist_queue = []
         if (platform == "win"):
             icon_path = resource_find("data/icon.ico")
         else:
@@ -580,8 +588,8 @@ class Neodeemer(MDApp):
             json.dump(data, settings_file)
         del self.s
         del self.y
-        self.s = SpotifyLoader(self.music_folder_path, self.create_subfolders, self.loc.get_market())
-        self.y = YoutubeLoader(self.music_folder_path, self.create_subfolders)
+        self.s = SpotifyLoader(self.music_folder_path, self.create_subfolders, self.label_loading_info, self.loc.get_market())
+        self.y = YoutubeLoader(self.music_folder_path, self.create_subfolders, self.label_loading_info)
 
 if __name__ == "__main__":
     os.environ["SSL_CERT_FILE"] = certifi.where()

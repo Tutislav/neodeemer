@@ -9,6 +9,7 @@ import spotipy
 from dotenv import load_dotenv
 from kivy.resources import resource_find
 from kivy.utils import platform
+from kivymd.uix.label import MDLabel
 from pytube import Playlist as YoutubePlaylist
 from spotipy.oauth2 import SpotifyClientCredentials
 from youtube_dl import YoutubeDL
@@ -31,13 +32,14 @@ class SpotifyFix(spotipy.Spotify):
             }
 
 class Base():
-    def __init__(self, music_folder_path: str, create_subfolders: bool):
+    def __init__(self, music_folder_path: str, create_subfolders: bool, label_loading_info: MDLabel):
         self.music_folder_path = music_folder_path
         self.create_subfolders = create_subfolders
+        self.label_loading_info = label_loading_info
 
 class SpotifyLoader(Base):
-    def __init__(self, music_folder_path: str, create_subfolders: bool, market: str):
-        super().__init__(music_folder_path, create_subfolders)
+    def __init__(self, music_folder_path: str, create_subfolders: bool, label_loading_info: MDLabel, market: str):
+        super().__init__(music_folder_path, create_subfolders, label_loading_info)
         if platform == "android":
             load_dotenv("env.env")
         else:
@@ -185,6 +187,7 @@ class SpotifyLoader(Base):
                     tracks2 = self.spotify.next(tracks2)
                     tracks.extend(tracks2["items"])
                     next = tracks2["next"]
+                position = 0
                 for track in tracks:
                     track2 = track["track"]
                     track_dict = self.track_to_dict(track2)
@@ -193,6 +196,9 @@ class SpotifyLoader(Base):
                         "playlist_file_path": playlist_file_path
                     })
                     list.append(track_dict)
+                    position += 1
+                    self.label_loading_info.text = str(position).rjust(3)
+                self.label_loading_info.text = ""
             except:
                 pass
         return list
@@ -368,6 +374,7 @@ class YoutubeLoader(Base):
                 playlist_name = tracks2.title
                 playlist_file_path = os.path.join(self.music_folder_path, norm(playlist_name, True, True) + ".m3u")
                 tracks = tracks2.videos
+                position = 0
                 for track in tracks:
                     track_dict = self.track_to_dict(track, True)
                     track_dict.update({
@@ -375,6 +382,9 @@ class YoutubeLoader(Base):
                         "playlist_file_path": playlist_file_path
                     })
                     list.append(track_dict)
+                    position += 1
+                    self.label_loading_info.text = str(position).rjust(3)
+                self.label_loading_info.text = ""
             except:
                 pass
         return list

@@ -471,8 +471,19 @@ MDScreen:
     orientation: "vertical"
     size_hint_y: None
     height: dp(500)
+    
     MDSpinner:
         pos_hint: {"center_x": .5, "center_y": .5}
         size_hint: 0.5, 0.5
         line_width: dp(5)
         active: True
+    
+    MDLabel:
+        id: label_loading_info
+        pos_hint: {"center_x": .5, "center_y": .5}
+        size_hint: 0.12, 0.1
+        haling: "center"
+        text: ""
+        font_style: "H4"
+        theme_text_color: "Custom"
+        text_color: app.theme_cls.primary_color
