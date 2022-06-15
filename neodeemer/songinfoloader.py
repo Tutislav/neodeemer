@@ -2,6 +2,7 @@ import json
 import os
 import sys
 from datetime import datetime
+from time import sleep
 from urllib import request
 
 import spotipy
@@ -13,7 +14,8 @@ from spotipy.oauth2 import SpotifyClientCredentials
 from youtube_dl import YoutubeDL
 from youtube_search import YoutubeSearch
 
-from tools import TrackStates, mstostr, norm, strtoms, track_file_state
+from tools import (TrackStates, contains_separate_word, mstostr, norm, strtoms,
+                   track_file_state)
 
 
 class SpotifyFix(spotipy.Spotify):
@@ -50,7 +52,7 @@ class SpotifyLoader(Base):
         if hasattr(sys, '_MEIPASS'):
             filter_file_path = os.path.join(sys._MEIPASS, "data", "ytsfilter.json")
         else:
-            filter_file_path = "data/ytsfilter.json"
+            filter_file_path = resource_find("data/ytsfilter.json")
         try:
             request.urlretrieve("https://raw.githubusercontent.com/Tutislav/neodeemer/main/neodeemer/data/ytsfilter.json", filter_file_path)
         except:
@@ -209,7 +211,11 @@ class SpotifyLoader(Base):
         video_id = None
         age_restricted = False
         while video_id == None:
-            videos = YoutubeSearch(text, max_results=max_results).to_dict()
+            try:
+                videos = YoutubeSearch(text, max_results=max_results).to_dict()
+            except:
+                sleep(2)
+                continue
             suitable_videos = []
             for video in videos:
                 video_channel = norm(video["channel"])
@@ -222,20 +228,22 @@ class SpotifyLoader(Base):
                 video["video_description"] = ""
                 video["video_details"] = ""
                 if video_views > 300:
+                    title_part_half = len(track_name3) / 2
                     title_part_count = 0
                     for word in track_name3:
                         if word in video_title:
                             title_part_count += 1
-                    title_contains_part = title_part_count > 1 or (title_part_count > 0 and artist_name2 in video_title)
+                    title_contains_part = title_part_count > title_part_half
                     if track_name2 in video_title or title_contains_part:
                         if track_name2 == artist_name2:
                             if not video_title.count(artist_name2) == 2:
                                 continue
                         contains_excluded = False
                         for word in excluded_words:
-                            if word in video_title and not word in track_name2:
-                                contains_excluded = True
-                                break
+                            if word in video_title and not word in track_name2 and not "official" in video_title:
+                                if contains_separate_word(video_title, word):
+                                    contains_excluded = True
+                                    break
                         if contains_excluded:
                             continue
                         try:
@@ -262,11 +270,9 @@ class SpotifyLoader(Base):
                                 contains_excluded = False
                                 for word in excluded_words:
                                     if word in video_description:
-                                        word_position = video_description.find(word)
-                                        if word_position < 100:
-                                            if video_description[word_position - 1] == " " or video_description[word_position + len(word)] == " ":
-                                                contains_excluded = True
-                                                break
+                                        if contains_separate_word(video_description, word, 100):
+                                            contains_excluded = True
+                                            break
                                 if contains_excluded:
                                     continue
                         if video_duration_s >= (track_duration_s - 150) and video_duration_s <= (track_duration_s + 150) and not any(word in video_channel for word in excluded_channels):

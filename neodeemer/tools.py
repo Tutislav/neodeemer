@@ -89,3 +89,18 @@ def submit_bug(track_dict):
 def submit_bugs(selected_tracks):
     for track in selected_tracks:
         submit_bug(track)
+
+def contains_separate_word(text, word, max_position=None):
+    contains = False
+    if word in text:
+        word_position = text.find(word)
+        if word_position > 0:
+            if text[word_position - 1] == " ":
+                contains = True
+        if word_position + len(word) < len(text):
+            if text[word_position + len(word)] == " ":
+                contains = True
+    if max_position != None:
+        if word_position > max_position:
+            contains = False
+    return contains
