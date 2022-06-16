@@ -96,6 +96,10 @@ class Neodeemer(MDApp):
     }
     playlist_queue = []
     sound = None
+    playlist_last = {
+        "spotify": {},
+        "youtube": {}
+    }
 
     def build(self):
         self.theme_cls.primary_palette = "DeepPurple"
@@ -151,6 +155,9 @@ class Neodeemer(MDApp):
         self.play_track = Thread()
         for i in range(1, 6):
             globals()[f"download_tracks_{i}"] = Thread()
+        self.text_playlist_last = self.screens[2].ids.text_splaylist_id
+        self.playlist_last_menu_list = []
+        self.playlist_last_menu = MDDropdownMenu(caller=self.text_playlist_last, items=self.playlist_last_menu_list, position="bottom", width_mult=5)
         self.check_create_subfolders = self.screens[4].ids.check_create_subfolders
         self.text_music_folder_path = self.screens[4].ids.text_music_folder_path
         self.text_localization = self.screens[4].ids.text_localization
@@ -162,7 +169,7 @@ class Neodeemer(MDApp):
                 "on_release": lambda x=lang:self.localization_menu_set(x)
             } for lang in self.loc.LANGUAGES.keys()
         ]
-        self.localization_menu = MDDropdownMenu(caller=self.text_localization, items=self.localization_menu_list, position="bottom", width_mult=2)
+        self.localization_menu = MDDropdownMenu(caller=self.text_localization, items=self.localization_menu_list, position="auto", width_mult=2)
         self.submit_bug_dialog = MDDialog(
             title=self.loc.get("Submit bug"),
             text=self.loc.get("If some tracks has bad quality or even doesn't match the name you can submit it"),
@@ -300,10 +307,17 @@ class Neodeemer(MDApp):
         if youtube:
             text = self.screen_cur.ids.text_yplaylist_id.text
             tracks = self.y.playlist_tracks(text)
+            if len(self.playlist_last["youtube"]) == 3:
+                del self.playlist_last["youtube"][list(self.playlist_last["youtube"].keys())[0]]
+            self.playlist_last["youtube"].update({tracks[0]["playlist_name"]: text})
         else:
             text = self.screen_cur.ids.text_splaylist_id.text
             tracks = self.s.playlist_tracks(text)
+            if len(self.playlist_last["spotify"]) == 3:
+                del self.playlist_last["spotify"][list(self.playlist_last["spotify"].keys())[0]]
+            self.playlist_last["spotify"].update({tracks[0]["playlist_name"]: text})
         self.screen_cur.tracks = tracks
+        self.settings_save(False)
         if len(tracks) > 0:
             label_playlist_info = self.screen_cur.ids.label_playlist_info
             label_playlist_info.text = "[b]" + tracks[0]["playlist_name"] + "[/b] - [b]" + str(len(tracks)) + "[/b]" + self.loc.get(" songs")
@@ -521,6 +535,33 @@ class Neodeemer(MDApp):
             tracks_actions.opacity = 0
             tracks_actions.height = 0
     
+    def playlist_last_menu_show(self, youtube=False):
+        if youtube:
+            playlist_last_dict = self.playlist_last["youtube"]
+            self.text_playlist_last = self.screen_cur.ids.text_yplaylist_id
+        else:
+            playlist_last_dict = self.playlist_last["spotify"]
+            self.text_playlist_last = self.screen_cur.ids.text_splaylist_id
+        self.playlist_last_menu_list = [
+            {
+                "viewclass": "OneLineListItem",
+                "height": dp(50),
+                "text": f"{playlist_id}",
+                "on_release": lambda x=playlist_id:self.playlist_last_menu_set(playlist_last_dict[x], youtube)
+            } for playlist_id in playlist_last_dict.keys()
+        ]
+        self.playlist_last_menu.caller = self.text_playlist_last
+        self.playlist_last_menu.items = self.playlist_last_menu_list
+        self.playlist_last_menu.open()
+
+    def playlist_last_menu_set(self, playlist_id, youtube=False):
+        self.playlist_last_menu.dismiss()
+        self.text_playlist_last.text = playlist_id
+        if youtube:
+            self.load_in_thread(self.playlist_load, self.tracks_actions_show, load_arg=True, show_arg=True, show_arg2=True)
+        else:
+            self.load_in_thread(self.playlist_load, self.tracks_actions_show, show_arg=True, show_arg2=True)
+
     def create_subfolders_change(self):
         if self.check_create_subfolders.active:
             self.create_subfolders = True
@@ -574,6 +615,8 @@ class Neodeemer(MDApp):
                 self.create_subfolders = data["create_subfolders"]
                 self.theme_cls.theme_style = data["theme"]
                 self.loc.set_lang(data["lang"])
+                if "playlist_last" in data:
+                    self.playlist_last = data["playlist_last"]
     
     def settings_save(self, notify=True):
         if notify:
@@ -583,7 +626,8 @@ class Neodeemer(MDApp):
                 "music_folder_path": self.music_folder_path,
                 "create_subfolders": self.create_subfolders,
                 "theme": self.theme_cls.theme_style,
-                "lang": self.loc.get_lang()
+                "lang": self.loc.get_lang(),
+                "playlist_last": self.playlist_last
             }
             json.dump(data, settings_file)
         del self.s

@@ -274,6 +274,7 @@ MDScreen:
                 hint_text: app.loc.get("Link or ID of Spotify playlist")
                 font_size: "26sp"
                 on_text_validate: app.load_in_thread(app.playlist_load, app.tracks_actions_show, show_arg=True, show_arg2=True)
+                on_focus: if self.focus: app.playlist_last_menu_show()
             
             MDLabel:
                 id: label_playlist_info
@@ -355,6 +356,7 @@ MDScreen:
                 hint_text: app.loc.get("Link of YouTube playlist")
                 font_size: "26sp"
                 on_text_validate: app.load_in_thread(app.playlist_load, app.tracks_actions_show, load_arg=True, show_arg=True, show_arg2=True)
+                on_focus: if self.focus: app.playlist_last_menu_show(True)
             
             MDLabel:
                 id: label_playlist_info
