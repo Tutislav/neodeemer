@@ -36,7 +36,7 @@ from songinfoloader import SpotifyLoader, YoutubeLoader
 from tools import TrackStates, submit_bugs, track_file_state
 
 
-__version__ = "0.2"
+__version__ = "0.3"
 
 class Loading(MDFloatLayout):
     pass
@@ -463,7 +463,10 @@ class Neodeemer(MDApp):
     
     def progressbar_update(self, *args):
         if self.download_queue_info["total_b"] > 0:
-            self.progressbar.value = int((self.download_queue_info["downloaded_b"] / self.download_queue_info["total_b"]) * 100)
+            if len(self.download_queue) <= 10:
+                self.progressbar.value = int((self.download_queue_info["downloaded_b"] / self.download_queue_info["total_b"]) * 100)
+            else:
+                self.progressbar.value = int(self.download_queue_info["position"] / len(self.download_queue) * 100)
             self.toolbar.title = self.loc.TITLE + " - " + str(self.download_queue_info["position"]) + "/" + str(len(self.download_queue))
         elif len(self.download_queue) > 0:
             if self.toolbar.title == self.loc.TITLE or len(self.toolbar.title) >= (len(self.loc.TITLE) + 6):
