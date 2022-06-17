@@ -222,6 +222,10 @@ class SpotifyLoader(Base):
             except:
                 sleep(2)
                 continue
+            else:
+                if len(videos) == 0:
+                    sleep(2)
+                    continue
             suitable_videos = []
             for video in videos:
                 video_channel = norm(video["channel"])
