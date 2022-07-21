@@ -61,8 +61,8 @@ class Download():
             else:
                 file_path = self.track_dict["file_path"]
             mtag = music_tag.load_file(file_path)
-            mtag["artist"] = self.track_dict["artist_name"]
-            mtag["albumartist"] = self.track_dict["artist_name"]
+            mtag["artist"] = self.track_dict["artist_name2"]
+            mtag["albumartist"] = self.track_dict["album_artist"]
             if len(self.track_dict["artist_genres"]) > 0:
                 mtag["genre"] = self.track_dict["artist_genres"][0]
             mtag["album"] = self.track_dict["album_name"]

@@ -69,6 +69,17 @@ class SpotifyLoader(Base):
         else:
             return ""
     
+    def artists_to_str(self, artists):
+        str = ""
+        if len(artists) > 1:
+            for i, artist in enumerate(artists):
+                str += artist["name"]
+                if i < (len(artists) - 1):
+                    str += "; "
+        else:
+            str = artists[0]["name"]
+        return str
+
     def artist_to_dict(self, artist):
         return {
             "artist_id": artist["id"],
@@ -90,6 +101,7 @@ class SpotifyLoader(Base):
         album_dict.update({
             "album_id": album["id"],
             "album_name": album["name"],
+            "album_artist": self.artists_to_str(album["artists"]),
             "album_trackscount": album["total_tracks"],
             "album_year": album_year,
             "album_image": self.select_image(album["images"])
@@ -110,6 +122,8 @@ class SpotifyLoader(Base):
         track_dict = {}
         track_dict.update(album_dict)
         track_dict.update({
+            "artist_name": track["artists"][0]["name"],
+            "artist_name2": self.artists_to_str(track["artists"]),
             "track_name": track["name"],
             "track_duration_ms": track["duration_ms"],
             "track_duration_str": mstostr(track["duration_ms"]),
@@ -340,8 +354,10 @@ class YoutubeLoader(Base):
         file_path = os.path.join(self.music_folder_path, norm(track_name, True, True) + ".m4a")
         track_dict = {
             "artist_name": "",
+            "artist_name2": "",
             "artist_genres": "",
             "album_name": "",
+            "album_artist": "",
             "album_trackscount": 0,
             "album_year": 0,
             "album_image": "",
