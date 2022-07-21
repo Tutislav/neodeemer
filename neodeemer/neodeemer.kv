@@ -470,20 +470,16 @@ MDScreen:
             MDBoxLayout:
 
 <Loading>:
-    orientation: "vertical"
-    size_hint_y: None
-    height: dp(500)
-    
     MDSpinner:
         pos_hint: {"center_x": .5, "center_y": .5}
-        size_hint: 0.5, 0.5
-        line_width: dp(5)
+        size_hint: 1.0, None
+        line_width: dp(6)
         active: True
     
     MDLabel:
         id: label_loading_info
-        pos_hint: {"center_x": .5, "center_y": .5}
-        size_hint: 0.12, 0.1
+        pos_hint: {"center_x": .55, "center_y": .5}
+        adaptive_width: True
         haling: "center"
         text: ""
         font_style: "H4"

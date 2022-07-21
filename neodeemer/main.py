@@ -157,7 +157,7 @@ class Neodeemer(MDApp):
             globals()[f"download_tracks_{i}"] = Thread()
         self.text_playlist_last = self.screens[2].ids.text_splaylist_id
         self.playlist_last_menu_list = []
-        self.playlist_last_menu = MDDropdownMenu(caller=self.text_playlist_last, items=self.playlist_last_menu_list, position="bottom", width_mult=5)
+        self.playlist_last_menu = MDDropdownMenu(caller=self.text_playlist_last, items=self.playlist_last_menu_list, position="bottom", width_mult=20)
         self.check_create_subfolders = self.screens[4].ids.check_create_subfolders
         self.text_music_folder_path = self.screens[4].ids.text_music_folder_path
         self.text_localization = self.screens[4].ids.text_localization
