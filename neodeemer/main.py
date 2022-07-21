@@ -307,15 +307,17 @@ class Neodeemer(MDApp):
         if youtube:
             text = self.screen_cur.ids.text_yplaylist_id.text
             tracks = self.y.playlist_tracks(text)
-            if len(self.playlist_last["youtube"]) == 3:
+            if len(self.playlist_last["youtube"]) > 3:
                 del self.playlist_last["youtube"][list(self.playlist_last["youtube"].keys())[0]]
-            self.playlist_last["youtube"].update({tracks[0]["playlist_name"]: text})
+            if len(tracks) > 0:
+                self.playlist_last["youtube"].update({tracks[0]["playlist_name"]: text})
         else:
             text = self.screen_cur.ids.text_splaylist_id.text
             tracks = self.s.playlist_tracks(text)
-            if len(self.playlist_last["spotify"]) == 3:
+            if len(self.playlist_last["spotify"]) > 3:
                 del self.playlist_last["spotify"][list(self.playlist_last["spotify"].keys())[0]]
-            self.playlist_last["spotify"].update({tracks[0]["playlist_name"]: text})
+            if len(tracks) > 0:
+                self.playlist_last["spotify"].update({tracks[0]["playlist_name"]: text})
         self.screen_cur.tracks = tracks
         self.settings_save(False)
         if len(tracks) > 0:
@@ -447,7 +449,7 @@ class Neodeemer(MDApp):
             Download(track, self.s, self.download_queue_info).playlist_file_save()
         while self.download_queue_info["position"] != len(self.download_queue):
             Clock.schedule_once(self.progressbar_update)
-            sleep(0.25)
+            sleep(0.5)
         self.progressbar_update()
         tracks_count = len(self.download_queue)
         self.download_queue = []
