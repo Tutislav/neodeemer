@@ -264,7 +264,7 @@ class SpotifyLoader(Base):
                                 continue
                         contains_excluded = False
                         for word in excluded_words:
-                            if word in video_title and not word in track_name2 and not "official" in video_title:
+                            if word in video_title and not word in track_name2:
                                 if contains_separate_word(video_title, word):
                                     contains_excluded = True
                                     break
@@ -289,18 +289,19 @@ class SpotifyLoader(Base):
                                 video_description = video_info["description"]
                         video_description = norm(video_description)
                         video["video_description"] = video_description
-                        if not artist_name2 in video_channel and not any(word in video_channel for word in preferred_channels):
-                            if not "provide to youtube" in video_description and not "taken from the album" in video_description:
-                                contains_excluded = False
-                                for word in excluded_words:
-                                    if word in video_description:
-                                        if contains_separate_word(video_description, word, 100):
-                                            contains_excluded = True
-                                            break
-                                if contains_excluded:
-                                    continue
-                        if video_duration_s >= (track_duration_s - 150) and video_duration_s <= (track_duration_s + 150) and not any(word in video_channel for word in excluded_channels):
-                            suitable_videos.append(video)
+                        if artist_name2 in video_title or artist_name2 in video_channel or artist_name2 in video_description:
+                            if not artist_name2 in video_channel and not any(word in video_channel for word in preferred_channels):
+                                if not "provide to youtube" in video_description and not "taken from the album" in video_description:
+                                    contains_excluded = False
+                                    for word in excluded_words:
+                                        if word in video_description:
+                                            if contains_separate_word(video_description, word, 100):
+                                                contains_excluded = True
+                                                break
+                                    if contains_excluded:
+                                        continue
+                            if video_duration_s >= (track_duration_s - 150) and video_duration_s <= (track_duration_s + 150) and not any(word in video_channel for word in excluded_channels):
+                                suitable_videos.append(video)
             for video in suitable_videos:
                 if "provided to youtube" in video["video_description"]:
                     video_id = video["id"]
