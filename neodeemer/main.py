@@ -645,6 +645,8 @@ if __name__ == "__main__":
     os.environ["KIVY_AUDIO"] = "ffpyplayer"
     if hasattr(sys, '_MEIPASS'):
         resource_add_path(os.path.join(sys._MEIPASS))
+        import ctypes
+        ctypes.windll.user32.ShowWindow(ctypes.windll.kernel32.GetConsoleWindow(), 6)
     app = Neodeemer()
     app.settings_file_path = os.path.join(app.user_data_dir, "settings.json")
     app.settings_load()

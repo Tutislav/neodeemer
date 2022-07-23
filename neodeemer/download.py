@@ -95,7 +95,9 @@ class Download():
         params = {
             "format": "m4a/bestaudio",
             "outtmpl": file_path_without_ext + ".%(ext)s",
-            "progress_hooks": [self.download_on_progress]
+            "progress_hooks": [self.download_on_progress],
+            "quiet": True,
+            "postprocessor_args": ["-loglevel", "quiet"]
         }
         with YoutubeDL(params) as ydl:
             video_info = ydl.extract_info(video_url, False)
