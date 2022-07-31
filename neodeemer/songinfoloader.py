@@ -15,7 +15,7 @@ from spotipy.oauth2 import SpotifyClientCredentials
 from youtube_dl import YoutubeDL
 from youtube_search import YoutubeSearch
 
-from tools import (TrackStates, contains_separate_word, mstostr, norm, strtoms,
+from tools import (TrackStates, contains_date, contains_separate_word, mstostr, norm, strtoms,
                    track_file_state)
 
 
@@ -226,7 +226,7 @@ class SpotifyLoader(Base):
         track_name2 = norm(track_dict["track_name"])
         track_name3 = track_name2.split()
         track_duration_s = track_dict["track_duration_ms"] / 1000
-        max_results = 4
+        max_results = 5
         text = track_dict["artist_name"] + " " + track_dict["track_name"]
         video_id = None
         age_restricted = False
@@ -268,6 +268,8 @@ class SpotifyLoader(Base):
                                 if contains_separate_word(video_title, word):
                                     contains_excluded = True
                                     break
+                        if contains_date(video["title"], track_name2):
+                            contains_excluded = True
                         if contains_excluded:
                             continue
                         try:

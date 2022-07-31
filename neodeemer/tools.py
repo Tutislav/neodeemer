@@ -1,5 +1,6 @@
 import json
 import os
+from datetime import datetime
 from enum import Enum
 
 import music_tag
@@ -103,4 +104,39 @@ def contains_separate_word(text, word, max_position=None):
     if max_position != None:
         if word_position > max_position:
             contains = False
+    return contains
+
+def contains_date(text, compare_text=None):
+    contains = False
+    date_start_position = -1
+    date_end_position = -1
+    date_formats = [
+        "%d/%m/%Y",
+        "%d/%m/%y",
+        "%d.%m.%Y",
+        "%d.%m.%y"
+    ]
+    for i, char in enumerate(text):
+        if char.isdigit():
+            if date_start_position == -1:
+                date_start_position = i
+            else:
+                date_end_position = i
+            if date_end_position - date_start_position > 10:
+                date_start_position = date_end_position
+    if date_end_position - date_start_position > 5 and date_end_position - date_start_position < 11:
+        date = text[date_start_position:date_end_position + 1]
+        for date_format in date_formats:
+            try:
+                datetime.strptime(date, date_format)
+                contains = True
+            except:
+                continue
+        if compare_text != None:
+            try:
+                datetime.strptime(date, "%Y")
+                if not date in compare_text:
+                    contains = True
+            except:
+                pass
     return contains
