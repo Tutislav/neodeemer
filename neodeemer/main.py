@@ -406,40 +406,53 @@ class Neodeemer(MDApp):
     def track_play(self, widget):
         Clock.schedule_once(self.loading.open)
         try:
-            if widget.children[0].icon == "play-circle-outline":
-                track_dict_temp = {}
-                track_dict_temp.update(widget.parent.parent.parent.children[1].track_dict)
-                if track_dict_temp["state"] != TrackStates.COMPLETED:
-                    track_dict_temp["forcedmp3"] = False
-                    track_dict_temp["folder_path"] = self.user_data_dir
-                    track_dict_temp["file_path"] = os.path.join(self.user_data_dir, "temp.m4a")
-                    track_dict_temp["file_path2"] = os.path.join(self.user_data_dir, "temp.mp3")
-                    if "playlist_name" in track_dict_temp:
-                        del track_dict_temp["playlist_name"]
-                    if track_file_state(track_dict_temp) != TrackStates.COMPLETED:
-                        download_queue_info_temp = {
-                            "position": 0,
-                            "downloaded_b": 0,
-                            "total_b": 0
-                        }
-                        Download(track_dict_temp, self.s, download_queue_info_temp).download_track()
-                        widget.parent.parent.parent.children[1].track_dict["video_id"] = track_dict_temp["video_id"]
-                        widget.parent.parent.parent.children[1].track_dict["age_restricted"] = track_dict_temp["age_restricted"]
-                        widget.parent.parent.parent.children[1].track_dict["state"] = TrackStates.FOUND
-                if self.sound != None:
+            if (platform == "android"):
+                track_dict = widget.parent.parent.parent.children[1].track_dict
+                self.s.track_find_video_id(track_dict)
+                from jnius import cast, autoclass
+                PythonActivity = autoclass("org.kivy.android.PythonActivity")
+                Intent = autoclass("android.content.Intent")
+                Uri = autoclass("android.net.Uri")
+                intent = Intent()
+                intent.setAction(Intent.ACTION_VIEW)
+                intent.setData(Uri.parse("https://youtu.be/" + track_dict["video_id"]))
+                currentActivity = cast("android.app.Activity", PythonActivity.mActivity)
+                currentActivity.startActivity(intent)
+            else:
+                if widget.children[0].icon == "play-circle-outline":
+                    track_dict_temp = {}
+                    track_dict_temp.update(widget.parent.parent.parent.children[1].track_dict)
+                    if track_dict_temp["state"] != TrackStates.COMPLETED:
+                        track_dict_temp["forcedmp3"] = False
+                        track_dict_temp["folder_path"] = self.user_data_dir
+                        track_dict_temp["file_path"] = os.path.join(self.user_data_dir, "temp.m4a")
+                        track_dict_temp["file_path2"] = os.path.join(self.user_data_dir, "temp.mp3")
+                        if "playlist_name" in track_dict_temp:
+                            del track_dict_temp["playlist_name"]
+                        if track_file_state(track_dict_temp) != TrackStates.COMPLETED:
+                            download_queue_info_temp = {
+                                "position": 0,
+                                "downloaded_b": 0,
+                                "total_b": 0
+                            }
+                            Download(track_dict_temp, self.s, download_queue_info_temp).download_track()
+                            widget.parent.parent.parent.children[1].track_dict["video_id"] = track_dict_temp["video_id"]
+                            widget.parent.parent.parent.children[1].track_dict["age_restricted"] = track_dict_temp["age_restricted"]
+                            widget.parent.parent.parent.children[1].track_dict["state"] = TrackStates.FOUND
+                    if self.sound != None:
+                        self.sound.stop()
+                        self.sound_prev_widget.children[0].icon = "play-circle-outline"
+                    if track_dict_temp["forcedmp3"]:
+                        file_path = track_dict_temp["file_path2"]
+                    else:
+                        file_path = track_dict_temp["file_path"]
+                    self.sound = SoundLoader.load(file_path)
+                    self.sound.play()
+                    widget.children[0].icon = "stop-circle"
+                    self.sound_prev_widget = widget
+                elif self.sound != None:
                     self.sound.stop()
-                    self.sound_prev_widget.children[0].icon = "play-circle-outline"
-                if track_dict_temp["forcedmp3"]:
-                    file_path = track_dict_temp["file_path2"]
-                else:
-                    file_path = track_dict_temp["file_path"]
-                self.sound = SoundLoader.load(file_path)
-                self.sound.play()
-                widget.children[0].icon = "stop-circle"
-                self.sound_prev_widget = widget
-            elif self.sound != None:
-                self.sound.stop()
-                widget.children[0].icon = "play-circle-outline"
+                    widget.children[0].icon = "play-circle-outline"
         except:
             Clock.schedule_once(partial(self.snackbar_show, self.loc.get("Error while playing track")))
         Clock.schedule_once(self.loading.dismiss)
