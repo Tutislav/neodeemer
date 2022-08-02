@@ -106,6 +106,15 @@ def contains_separate_word(text, word, max_position=None):
             contains = False
     return contains
 
+def contains_part(text, compare_text):
+    compare_text2 = compare_text.split()
+    parts_half = len(compare_text2) / 2
+    parts_count = 0
+    for word in compare_text2:
+        if word in text:
+            parts_count += 1
+    return parts_count > parts_half
+
 def contains_date(text, compare_text=None):
     contains = False
     date_start_position = -1

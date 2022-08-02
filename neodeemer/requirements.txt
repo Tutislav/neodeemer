@@ -10,3 +10,4 @@ spotipy
 unidecode
 https://github.com/ytdl-org/youtube-dl/archive/master.tar.gz
 youtube_search
+ytmusicapi

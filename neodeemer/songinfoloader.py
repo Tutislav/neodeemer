@@ -14,8 +14,9 @@ from pytube import Playlist as YoutubePlaylist
 from spotipy.oauth2 import SpotifyClientCredentials
 from youtube_dl import YoutubeDL
 from youtube_search import YoutubeSearch
+from ytmusicapi import YTMusic
 
-from tools import (TrackStates, contains_date, contains_separate_word, mstostr, norm, strtoms,
+from tools import (TrackStates, contains_date, contains_separate_word, contains_part, mstostr, norm, strtoms,
                    track_file_state)
 
 
@@ -223,13 +224,44 @@ class SpotifyLoader(Base):
         excluded_channels = self.ytsfilter["excluded_channels"]
         excluded_words = self.ytsfilter["excluded_words"]
         artist_name2 = norm(track_dict["artist_name"])
+        album_name2 = norm(track_dict["album_name"])
         track_name2 = norm(track_dict["track_name"])
-        track_name3 = track_name2.split()
         track_duration_s = track_dict["track_duration_ms"] / 1000
         max_results = 5
         text = track_dict["artist_name"] + " " + track_dict["track_name"]
         video_id = None
         age_restricted = False
+        with YTMusic() as ytmusic:
+            tracks = ytmusic.search(text, "songs")
+            if len(tracks) > 0:
+                track = tracks[0]
+                track_artist = norm(track["artists"][0]["name"])
+                track_name = norm(track["title"])
+                if artist_name2 in track_artist or contains_part(track_artist, artist_name2):
+                    if track_name2 in track_name or contains_part(track_name, track_name2):
+                        video_id = track["videoId"]
+            if video_id == None:
+                album_text = track_dict["artist_name"] + " " + track_dict["album_name"]
+                albums = ytmusic.search(album_text, "albums")
+                if len(albums) > 0:
+                    album = albums[0]
+                    album_artist = norm(album["artists"][0]["name"])
+                    album_name = norm(album["title"])
+                    if artist_name2 in album_artist or contains_part(album_artist, artist_name2):
+                        if album_name2 in album_name or contains_part(album_name, album_name2):
+                            album2 = ytmusic.get_album(album["browseId"])
+                            tracks = album2["tracks"]
+                            for track in tracks:
+                                track_name = norm(track["title"])
+                                if track_name2 in track_name or contains_part(track_name, track_name2):
+                                    contains_excluded = False
+                                    for word in excluded_words:
+                                        if word in track_name and not word in track_name2:
+                                            if contains_separate_word(track_name, word):
+                                                contains_excluded = True
+                                                break
+                                    if not contains_excluded:
+                                        video_id = track["videoId"]
         while video_id == None:
             try:
                 videos = YoutubeSearch(text, max_results=max_results).to_dict()
@@ -252,13 +284,7 @@ class SpotifyLoader(Base):
                 video["video_description"] = ""
                 video["video_details"] = ""
                 if video_views > 300:
-                    title_part_half = len(track_name3) / 2
-                    title_part_count = 0
-                    for word in track_name3:
-                        if word in video_title:
-                            title_part_count += 1
-                    title_contains_part = title_part_count > title_part_half
-                    if track_name2 in video_title or title_contains_part:
+                    if track_name2 in video_title or contains_part(video_title, track_name2):
                         if track_name2 == artist_name2:
                             if not video_title.count(artist_name2) == 2:
                                 continue
