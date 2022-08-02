@@ -6,7 +6,7 @@ from urllib import request
 import music_tag
 import requests
 from pytube import YouTube
-from youtube_dl import YoutubeDL
+from yt_dlp import YoutubeDL
 
 from songinfoloader import SpotifyLoader
 from tools import HEADERS, TrackStates

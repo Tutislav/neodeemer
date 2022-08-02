@@ -12,7 +12,7 @@ from kivy.utils import platform
 from kivymd.uix.label import MDLabel
 from pytube import Playlist as YoutubePlaylist
 from spotipy.oauth2 import SpotifyClientCredentials
-from youtube_dl import YoutubeDL
+from yt_dlp import YoutubeDL
 from youtube_search import YoutubeSearch
 from ytmusicapi import YTMusic
 

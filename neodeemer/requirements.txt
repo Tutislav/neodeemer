@@ -8,6 +8,6 @@ https://github.com/JosiasAurel/pytube/archive/patch-regex.tar.gz
 requests
 spotipy
 unidecode
-https://github.com/ytdl-org/youtube-dl/archive/master.tar.gz
+yt-dlp
 youtube_search
 ytmusicapi
