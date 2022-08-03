@@ -18,6 +18,8 @@ CZ = {
     "Spotify playlist": "Spotify playlist",
     "YouTube playlist": "YouTube playlist",
     "Settings": "Nastavení",
+    "Update": "Aktualizace",
+    "New version is available": "Je dostupná nová verze",
     #SpotifyScreen
     "[b]Artists[/b]": "[b]Interpreti[/b]",
     "[b]Albums[/b]": "[b]Alba[/b]",

@@ -149,3 +149,25 @@ def contains_date(text, compare_text=None):
             except:
                 pass
     return contains
+
+def open_url(url, platform):
+    if platform == "android":
+        from jnius import cast, autoclass
+        PythonActivity = autoclass("org.kivy.android.PythonActivity")
+        Intent = autoclass("android.content.Intent")
+        Uri = autoclass("android.net.Uri")
+        intent = Intent()
+        intent.setAction(Intent.ACTION_VIEW)
+        intent.setData(Uri.parse(url))
+        currentActivity = cast("android.app.Activity", PythonActivity.mActivity)
+        currentActivity.startActivity(intent)
+    else:
+        import webbrowser
+        webbrowser.open(url)
+
+def check_update_available(current_version):
+    url = "https://api.github.com/repos/Tutislav/neodeemer/releases"
+    urldata = requests.get(url)
+    data = urldata.json()
+    new_version = data[0]["tag_name"]
+    return new_version != current_version

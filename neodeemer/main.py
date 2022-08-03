@@ -33,7 +33,7 @@ from plyer import notification
 from download import Download
 from localization import Localization
 from songinfoloader import SpotifyLoader, YoutubeLoader
-from tools import TrackStates, submit_bugs, track_file_state
+from tools import TrackStates, check_update_available, open_url, submit_bugs, track_file_state
 
 
 __version__ = "0.3"
@@ -125,7 +125,7 @@ class Neodeemer(MDApp):
         self.albums_tab = self.screen_cur.ids.albums_tab
         self.tracks_tab = self.screen_cur.ids.tracks_tab
         self.file_manager = MDFileManager(exit_manager=self.file_manager_close, select_path=self.file_manager_select)
-        if (platform == "android"):
+        if platform == "android":
             from android.permissions import Permission, request_permissions
             from android.storage import primary_external_storage_path
             try:
@@ -155,6 +155,10 @@ class Neodeemer(MDApp):
         self.play_track = Thread()
         for i in range(1, 6):
             globals()[f"download_tracks_{i}"] = Thread()
+        self.navigation_menu_list = self.root.ids.navigation_menu_list
+        if check_update_available(__version__):
+            line = TwoLineIconListItem(text=self.loc.get("Update"), secondary_text=self.loc.get("New version is available"), on_press=lambda x:open_url("https://github.com/Tutislav/neodeemer/releases/latest", platform))
+            self.navigation_menu_list.add_widget(line)
         self.text_playlist_last = self.screens[2].ids.text_splaylist_id
         self.playlist_last_menu_list = []
         self.playlist_last_menu = MDDropdownMenu(caller=self.text_playlist_last, items=self.playlist_last_menu_list, position="bottom", width_mult=20)
@@ -406,18 +410,10 @@ class Neodeemer(MDApp):
     def track_play(self, widget):
         Clock.schedule_once(self.loading.open)
         try:
-            if (platform == "android"):
+            if platform == "android":
                 track_dict = widget.parent.parent.parent.children[1].track_dict
                 self.s.track_find_video_id(track_dict)
-                from jnius import cast, autoclass
-                PythonActivity = autoclass("org.kivy.android.PythonActivity")
-                Intent = autoclass("android.content.Intent")
-                Uri = autoclass("android.net.Uri")
-                intent = Intent()
-                intent.setAction(Intent.ACTION_VIEW)
-                intent.setData(Uri.parse("https://youtu.be/" + track_dict["video_id"]))
-                currentActivity = cast("android.app.Activity", PythonActivity.mActivity)
-                currentActivity.startActivity(intent)
+                open_url("https://youtu.be/" + track_dict["video_id"], platform)
             else:
                 if widget.children[0].icon == "play-circle-outline":
                     track_dict_temp = {}
