@@ -1,4 +1,5 @@
 # -*- mode: python ; coding: utf-8 -*-
+from PyInstaller.utils.hooks import collect_data_files
 from kivy_deps import sdl2, glew
 
 
@@ -9,7 +10,7 @@ a = Analysis(
     ['main.py'],
     pathex=[],
     binaries=[],
-    datas=[],
+    datas=collect_data_files('ytmusicapi'),
     hiddenimports=['plyer.platforms.win.notification'],
     hookspath=[],
     hooksconfig={},
