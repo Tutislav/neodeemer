@@ -410,45 +410,45 @@ class Neodeemer(MDApp):
     def track_play(self, widget):
         Clock.schedule_once(self.loading.open)
         try:
-            if platform == "android":
-                track_dict = widget.parent.parent.parent.children[1].track_dict
-                self.s.track_find_video_id(track_dict)
-                open_url("https://youtu.be/" + track_dict["video_id"], platform)
-            else:
-                if widget.children[0].icon == "play-circle-outline":
-                    track_dict_temp = {}
-                    track_dict_temp.update(widget.parent.parent.parent.children[1].track_dict)
-                    if track_dict_temp["state"] != TrackStates.COMPLETED:
-                        track_dict_temp["forcedmp3"] = False
-                        track_dict_temp["folder_path"] = self.user_data_dir
-                        track_dict_temp["file_path"] = os.path.join(self.user_data_dir, "temp.m4a")
-                        track_dict_temp["file_path2"] = os.path.join(self.user_data_dir, "temp.mp3")
-                        if "playlist_name" in track_dict_temp:
-                            del track_dict_temp["playlist_name"]
-                        if track_file_state(track_dict_temp) != TrackStates.COMPLETED:
+            if widget.children[0].icon == "play-circle-outline":
+                track_dict_temp = {}
+                track_dict_temp.update(widget.parent.parent.parent.children[1].track_dict)
+                if track_dict_temp["state"] != TrackStates.COMPLETED:
+                    track_dict_temp["forcedmp3"] = False
+                    track_dict_temp["folder_path"] = self.user_data_dir
+                    track_dict_temp["file_path"] = os.path.join(self.user_data_dir, "temp.m4a")
+                    track_dict_temp["file_path2"] = os.path.join(self.user_data_dir, "temp.mp3")
+                    if "playlist_name" in track_dict_temp:
+                        del track_dict_temp["playlist_name"]
+                    if track_file_state(track_dict_temp) != TrackStates.COMPLETED:
+                        if platform == "android":
+                            self.s.track_find_video_id(track_dict_temp)
+                            open_url("https://youtu.be/" + track_dict_temp["video_id"], platform)
+                        else:
                             download_queue_info_temp = {
                                 "position": 0,
                                 "downloaded_b": 0,
                                 "total_b": 0
                             }
                             Download(track_dict_temp, self.s, download_queue_info_temp).download_track()
-                            widget.parent.parent.parent.children[1].track_dict["video_id"] = track_dict_temp["video_id"]
-                            widget.parent.parent.parent.children[1].track_dict["age_restricted"] = track_dict_temp["age_restricted"]
-                            widget.parent.parent.parent.children[1].track_dict["state"] = TrackStates.FOUND
-                    if self.sound != None:
-                        self.sound.stop()
-                        self.sound_prev_widget.children[0].icon = "play-circle-outline"
-                    if track_dict_temp["forcedmp3"]:
-                        file_path = track_dict_temp["file_path2"]
-                    else:
-                        file_path = track_dict_temp["file_path"]
+                        widget.parent.parent.parent.children[1].track_dict["video_id"] = track_dict_temp["video_id"]
+                        widget.parent.parent.parent.children[1].track_dict["age_restricted"] = track_dict_temp["age_restricted"]
+                        widget.parent.parent.parent.children[1].track_dict["state"] = TrackStates.FOUND
+                if self.sound != None:
+                    self.sound.stop()
+                    self.sound_prev_widget.children[0].icon = "play-circle-outline"
+                if track_dict_temp["forcedmp3"]:
+                    file_path = track_dict_temp["file_path2"]
+                else:
+                    file_path = track_dict_temp["file_path"]
+                if track_file_state(track_dict_temp) == TrackStates.COMPLETED:
                     self.sound = SoundLoader.load(file_path)
                     self.sound.play()
                     widget.children[0].icon = "stop-circle"
                     self.sound_prev_widget = widget
-                elif self.sound != None:
-                    self.sound.stop()
-                    widget.children[0].icon = "play-circle-outline"
+            elif self.sound != None:
+                self.sound.stop()
+                widget.children[0].icon = "play-circle-outline"
         except:
             Clock.schedule_once(partial(self.snackbar_show, self.loc.get("Error while playing track")))
         Clock.schedule_once(self.loading.dismiss)
@@ -657,6 +657,16 @@ if __name__ == "__main__":
         import ctypes
         ctypes.windll.user32.ShowWindow(ctypes.windll.kernel32.GetConsoleWindow(), 6)
     app = Neodeemer()
-    app.settings_file_path = os.path.join(app.user_data_dir, "settings.json")
+    if platform == "android":
+        from android.storage import primary_external_storage_path
+        settings_folder_path = os.path.join(primary_external_storage_path(), app.loc.TITLE)
+    else:
+        settings_folder_path = app.user_data_dir
+    if not os.path.exists(settings_folder_path):
+        try:
+            os.makedirs(settings_folder_path)
+        except OSError:
+            pass
+    app.settings_file_path = os.path.join(settings_folder_path, "settings.json")
     app.settings_load()
     app.run()
