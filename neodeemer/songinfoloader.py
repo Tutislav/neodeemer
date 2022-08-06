@@ -231,37 +231,40 @@ class SpotifyLoader(Base):
         text = track_dict["artist_name"] + " " + track_dict["track_name"]
         video_id = None
         age_restricted = False
-        with YTMusic() as ytmusic:
-            tracks = ytmusic.search(text, "songs")
-            if len(tracks) > 0:
-                track = tracks[0]
-                track_artist = norm(track["artists"][0]["name"])
-                track_name = norm(track["title"])
-                if artist_name2 in track_artist or contains_part(track_artist, artist_name2):
-                    if track_name2 in track_name or contains_part(track_name, track_name2):
-                        video_id = track["videoId"]
-            if video_id == None:
-                album_text = track_dict["artist_name"] + " " + track_dict["album_name"]
-                albums = ytmusic.search(album_text, "albums")
-                if len(albums) > 0:
-                    album = albums[0]
-                    album_artist = norm(album["artists"][0]["name"])
-                    album_name = norm(album["title"])
-                    if artist_name2 in album_artist or contains_part(album_artist, artist_name2):
-                        if album_name2 in album_name or contains_part(album_name, album_name2):
-                            album2 = ytmusic.get_album(album["browseId"])
-                            tracks = album2["tracks"]
-                            for track in tracks:
-                                track_name = norm(track["title"])
-                                if track_name2 in track_name or contains_part(track_name, track_name2):
-                                    contains_excluded = False
-                                    for word in excluded_words:
-                                        if word in track_name and not word in track_name2:
-                                            if contains_separate_word(track_name, word):
-                                                contains_excluded = True
-                                                break
-                                    if not contains_excluded:
-                                        video_id = track["videoId"]
+        try:
+            with YTMusic() as ytmusic:
+                tracks = ytmusic.search(text, "songs")
+                if len(tracks) > 0:
+                    track = tracks[0]
+                    track_artist = norm(track["artists"][0]["name"])
+                    track_name = norm(track["title"])
+                    if artist_name2 in track_artist or contains_part(track_artist, artist_name2):
+                        if track_name2 in track_name or contains_part(track_name, track_name2):
+                            video_id = track["videoId"]
+                if video_id == None:
+                    album_text = track_dict["artist_name"] + " " + track_dict["album_name"]
+                    albums = ytmusic.search(album_text, "albums")
+                    if len(albums) > 0:
+                        album = albums[0]
+                        album_artist = norm(album["artists"][0]["name"])
+                        album_name = norm(album["title"])
+                        if artist_name2 in album_artist or contains_part(album_artist, artist_name2):
+                            if album_name2 in album_name or contains_part(album_name, album_name2):
+                                album2 = ytmusic.get_album(album["browseId"])
+                                tracks = album2["tracks"]
+                                for track in tracks:
+                                    track_name = norm(track["title"])
+                                    if track_name2 in track_name or contains_part(track_name, track_name2):
+                                        contains_excluded = False
+                                        for word in excluded_words:
+                                            if word in track_name and not word in track_name2:
+                                                if contains_separate_word(track_name, word):
+                                                    contains_excluded = True
+                                                    break
+                                        if not contains_excluded:
+                                            video_id = track["videoId"]
+        except:
+            pass
         while video_id == None:
             try:
                 videos = YoutubeSearch(text, max_results=max_results).to_dict()
