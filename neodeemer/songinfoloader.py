@@ -46,6 +46,7 @@ class SpotifyLoader(Base):
         else:
             load_dotenv(resource_find(".env"))
         self.spotify = SpotifyFix(client_credentials_manager=SpotifyClientCredentials())
+        self.limit_small = 10
         self.limit = 50
         self.market = market
         self.youtube_api_key = os.environ.get("YOUTUBE_API_KEY")
@@ -80,6 +81,15 @@ class SpotifyLoader(Base):
         else:
             str = artists[0]["name"]
         return str
+
+    def limit_offset(self, page):
+        if page > 0:
+            limit = self.limit_small
+            offset = (page - 1) * 10
+        else:
+            limit = self.limit
+            offset = 0
+        return limit, offset
 
     def artist_to_dict(self, artist):
         return {
@@ -145,33 +155,36 @@ class SpotifyLoader(Base):
     def artists_search(self, artist_name):
         list = []
         if len(artist_name) > 0:
-            artists = self.spotify.search(artist_name, type="artist", limit=self.limit, market=self.market)
+            artists = self.spotify.search(artist_name, type="artist", limit=self.limit_small, market=self.market)
             artists = artists["artists"]["items"]
             for artist in artists:
                 list.append(self.artist_to_dict(artist))
         return list
     
-    def albums_search(self, album_name):
+    def albums_search(self, album_name, page=0):
         list = []
         if len(album_name) > 0:
-            albums = self.spotify.search(album_name, type="album", limit=self.limit, market=self.market)
+            limit, offset = self.limit_offset(page)
+            albums = self.spotify.search(album_name, type="album", limit=limit, offset=offset, market=self.market)
             albums = albums["albums"]["items"]
             for album in albums:
                 list.append(self.album_to_dict(album))
         return list
     
-    def tracks_search(self, track_name):
+    def tracks_search(self, track_name, page=0):
         list = []
         if len(track_name) > 0:
-            tracks = self.spotify.search(track_name, type="track", limit=self.limit, market=self.market)
+            limit, offset = self.limit_offset(page)
+            tracks = self.spotify.search(track_name, type="track", limit=limit, offset=offset, market=self.market)
             tracks = tracks["tracks"]["items"]
             for track in tracks:
                 list.append(self.track_to_dict(track))
         return list
     
-    def artist_albums(self, artist_dict):
+    def artist_albums(self, artist_dict, page=0):
         list = []
-        albums = self.spotify.artist_albums(artist_dict["artist_id"], limit=self.limit)
+        limit, offset = self.limit_offset(page)
+        albums = self.spotify.artist_albums(artist_dict["artist_id"], limit=limit, offset=offset)
         albums = albums["items"]
         for album in albums:
             list.append(self.album_to_dict(album, artist_dict))

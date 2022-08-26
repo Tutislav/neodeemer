@@ -133,6 +133,8 @@ MDScreen:
                 on_text_validate: app.load_in_thread(app.albums_load, app.albums_show)
 
         ScrollView:
+            id: scrollview
+            
             MDList:
                 id: mdlist_albums
 
@@ -154,6 +156,8 @@ MDScreen:
                 on_text_validate: app.load_in_thread(app.tracks_load, app.tracks_show)
 
         ScrollView:
+            id: scrollview
+            
             MDSelectionList:
                 id: mdlist_tracks
                 on_selected: app.mdlist_selected(*args)
@@ -213,7 +217,7 @@ MDScreen:
                 id: text_youtube_search
                 hint_text: app.loc.get("Search video name")
                 font_size: "26sp"
-                on_text_validate: app.load_in_thread(app.youtube_load, app.playlist_show, show_arg=True)
+                on_text_validate: app.load_in_thread(app.youtube_load, app.playlist_show, show_arg2=True)
 
         ScrollView:
             MDSelectionList:
@@ -283,6 +287,8 @@ MDScreen:
                 markup: True
 
         ScrollView:
+            id: scrollview
+            
             MDSelectionList:
                 id: mdlist_tracks
                 on_selected: app.mdlist_selected(*args)
@@ -365,6 +371,8 @@ MDScreen:
                 markup: True
 
         ScrollView:
+            id: scrollview
+            
             MDSelectionList:
                 id: mdlist_tracks
                 on_selected: app.mdlist_selected(*args)

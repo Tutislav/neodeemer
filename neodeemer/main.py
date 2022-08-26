@@ -19,11 +19,12 @@ from kivy.uix.screenmanager import Screen, ScreenManager
 from kivy.utils import platform
 from kivymd.app import MDApp
 from kivymd.uix.boxlayout import MDBoxLayout
-from kivymd.uix.floatlayout import MDFloatLayout
 from kivymd.uix.button import MDFlatButton
 from kivymd.uix.dialog import MDDialog
 from kivymd.uix.filemanager import MDFileManager
+from kivymd.uix.floatlayout import MDFloatLayout
 from kivymd.uix.list import (IconLeftWidget, IconRightWidget, ILeftBody,
+                             OneLineAvatarIconListItem,
                              TwoLineAvatarIconListItem, TwoLineIconListItem)
 from kivymd.uix.menu import MDDropdownMenu
 from kivymd.uix.snackbar import Snackbar
@@ -33,8 +34,8 @@ from plyer import notification
 from download import Download
 from localization import Localization
 from songinfoloader import SpotifyLoader, YoutubeLoader
-from tools import TrackStates, check_update_available, open_url, submit_bugs, track_file_state
-
+from tools import (TrackStates, check_update_available, open_url, submit_bugs,
+                   track_file_state)
 
 __version__ = "0.4"
 
@@ -65,19 +66,23 @@ class ArtistsTab(MDBoxLayout, MDTabsBase):
 
 class AlbumsTab(MDBoxLayout, MDTabsBase):
     tab_name = "AlbumsTab"
+    page = 1
     pass
 
 class TracksTab(MDBoxLayout, MDTabsBase):
     tab_name = "TracksTab"
+    page = 1
     pass
 
 class YoutubeScreen(Screen):
     pass
 
 class SPlaylistScreen(Screen):
+    page = 1
     pass
 
 class YPlaylistScreen(Screen):
+    page = 1
     pass
 
 class SettingsScreen(Screen):
@@ -228,12 +233,15 @@ class Neodeemer(MDApp):
             line.add_widget(AsyncImageLeftWidget(source=artist["artist_image"]))
             mdlist_artists.add_widget(line)
     
-    def albums_load(self, artist_dict=None):
+    def albums_load(self, artist_dict=None, reset_page=True):
+        if reset_page:
+            self.albums_tab.page = 1
         if artist_dict != None:
-            albums = self.s.artist_albums(artist_dict)
+            Clock.schedule_once(partial(self.text_widget_clear, self.albums_tab.ids.text_albums_search))
+            albums = self.s.artist_albums(artist_dict, self.albums_tab.page)
         else:
             text = self.albums_tab.ids.text_albums_search.text
-            albums = self.s.albums_search(text)
+            albums = self.s.albums_search(text, self.albums_tab.page)
         self.albums_tab.albums = albums
         self.albums_tab.artist_dict = artist_dict
         if len(albums) > 0:
@@ -259,13 +267,17 @@ class Neodeemer(MDApp):
             line = ListLineAlbum(text=album["album_name"], secondary_text=secondary_text, album_dict=album, on_press=lambda widget:self.load_in_thread(self.tracks_load, self.tracks_show, widget.album_dict))
             line.add_widget(AsyncImageLeftWidget(source=album["album_image"]))
             mdlist_albums.add_widget(line)
+        self.mdlist_add_page_controls(mdlist_albums)
     
-    def tracks_load(self, album_dict=None):
+    def tracks_load(self, album_dict=None, reset_page=True):
+        if reset_page:
+            self.tracks_tab.page = 1
         if album_dict != None:
+            Clock.schedule_once(partial(self.text_widget_clear, self.tracks_tab.ids.text_tracks_search))
             tracks = self.s.album_tracks(album_dict)
         else:
             text = self.tracks_tab.ids.text_tracks_search.text
-            tracks = self.s.tracks_search(text)
+            tracks = self.s.tracks_search(text, self.tracks_tab.page)
         self.tracks_tab.tracks = tracks
         self.tracks_tab.album_dict = album_dict
         if len(tracks) > 0:
@@ -297,6 +309,8 @@ class Neodeemer(MDApp):
             else:
                 line.add_widget(IconRightWidget(icon="download-outline", on_press=lambda widget:self.mdlist_on_press(widget)))
             mdlist_tracks.add_widget(line)
+        if album_dict == None:
+            self.mdlist_add_page_controls(mdlist_tracks)
     
     def youtube_load(self):
         text = self.screen_cur.ids.text_youtube_search.text
@@ -323,6 +337,7 @@ class Neodeemer(MDApp):
             if len(tracks) > 0:
                 self.playlist_last["spotify"].update({tracks[0]["playlist_name"]: text})
         self.screen_cur.tracks = tracks
+        self.screen_cur.page = 1
         self.settings_save(False)
         if len(tracks) > 0:
             label_playlist_info = self.screen_cur.ids.label_playlist_info
@@ -331,8 +346,11 @@ class Neodeemer(MDApp):
         else:
             return False
     
-    def playlist_show(self, youtube=False, *args):
+    def playlist_show(self, page=0, youtube=False, *args):
         tracks = self.screen_cur.tracks
+        if page:
+            limit, offset = self.s.limit_offset(page)
+            tracks = tracks[offset:offset + limit]
         mdlist_tracks = self.screen_cur.ids.mdlist_tracks
         mdlist_tracks.clear_widgets()
         for track in tracks:
@@ -347,15 +365,20 @@ class Neodeemer(MDApp):
             else:
                 line.add_widget(IconRightWidget(icon="download-outline", on_press=lambda widget:self.mdlist_on_press(widget)))
             mdlist_tracks.add_widget(line)
+        if page:
+            self.mdlist_add_page_controls(mdlist_tracks)
     
-    def load_in_thread(self, load_function, show_function=None, load_arg=None, show_arg=None, show_arg2=None):
+    def load_in_thread(self, load_function, show_function=None, load_arg=None, load_arg2=None, show_arg=None, show_arg2=None):
         def load():
-            if load_arg != None:
-                show = load_function(load_arg)
+            if load_arg != None or load_arg2 != None:
+                if load_arg2 != None:
+                    show = load_function(load_arg, load_arg2)
+                else:
+                    show = load_function(load_arg)
             else:
                 show = load_function()
             if show_function != None and show:
-                if show_arg != None:
+                if show_arg != None or show_arg2 != None:
                     if show_arg2 != None:
                         Clock.schedule_once(partial(show_function, show_arg, show_arg2))
                     else:
@@ -491,23 +514,32 @@ class Neodeemer(MDApp):
     def snackbar_show(self, text, *args):
         Snackbar(text=text).open()
     
+    def text_widget_clear(self, text_widget, *args):
+        text_widget.text = ""
+
     def mdlist_on_press(self, widget):
         widget.parent.parent.parent.do_selected_item()
     
     def mdlist_selected(self, instance_selection_list, instance_selection_item):
         self.toolbar.title = str(len(instance_selection_list.get_selected_list_items()))
-        if not instance_selection_item.children[1].track_dict in self.selected_tracks:
-            self.selected_tracks.append(instance_selection_item.children[1].track_dict)
+        if hasattr(instance_selection_item.children[1], "track_dict"):
+            if not instance_selection_item.children[1].track_dict in self.selected_tracks:
+                self.selected_tracks.append(instance_selection_item.children[1].track_dict)
+        else:
+            instance_selection_item.do_unselected_item()
+            if not instance_selection_list.get_selected_list_items():
+                Clock.schedule_once(partial(self.mdlist_set_mode, instance_selection_list, 0))
     
     def mdlist_unselected(self, instance_selection_list, instance_selection_item):
         if instance_selection_list.get_selected_list_items():
             self.toolbar.title = str(len(instance_selection_list.get_selected_list_items()))
         else:
             self.toolbar.title = self.loc.TITLE
-        if instance_selection_item.children[1].track_dict in self.selected_tracks:
-            self.selected_tracks.remove(instance_selection_item.children[1].track_dict)
+        if hasattr(instance_selection_item.children[1], "track_dict"):
+            if instance_selection_item.children[1].track_dict in self.selected_tracks:
+                self.selected_tracks.remove(instance_selection_item.children[1].track_dict)
     
-    def mdlist_set_mode(self, instance_selection_list, mode):
+    def mdlist_set_mode(self, instance_selection_list, mode, *args):
         if mode:
             bg_color = self.theme_cls.accent_color
             left_action_items = [
@@ -523,6 +555,40 @@ class Neodeemer(MDApp):
         Animation(md_bg_color=bg_color, d=0.2).start(self.toolbar)
         self.toolbar.left_action_items = left_action_items
     
+    def mdlist_add_page_controls(self, mdlist):
+        line = OneLineAvatarIconListItem()
+        line.add_widget(IconLeftWidget(icon="arrow-left-bold", on_press=lambda x:self.tracks_change_page(False)))
+        line.add_widget(IconRightWidget(icon="arrow-right-bold", on_press=lambda x:self.tracks_change_page()))
+        mdlist.add_widget(line)
+    
+    def tracks_change_page(self, next=True):
+        if self.screen_cur.name == "SpotifyScreen":
+            view_cur = self.tab_cur
+        else:
+            view_cur = self.screen_cur
+        page_prev = view_cur.page
+        if next and view_cur.page < 10:
+            view_cur.page += 1
+        elif not next and view_cur.page > 1:
+            view_cur.page -= 1
+        if view_cur.page != page_prev:
+            view_cur.ids.scrollview.scroll_y = 1
+            if self.screen_cur.name == "SpotifyScreen":
+                if view_cur.tab_name == "TracksTab":
+                    self.load_in_thread(self.tracks_load, self.tracks_show, load_arg2=False)
+                elif view_cur.tab_name == "AlbumsTab":
+                    text = self.albums_tab.ids.text_albums_search.text
+                    mdlist_albums = self.albums_tab.ids.mdlist_albums
+                    if len(mdlist_albums.children) > 1 and len(text) == 0:
+                        album_dict = mdlist_albums.children[1].album_dict
+                    else:
+                        album_dict = None
+                    self.load_in_thread(self.albums_load, self.albums_show, album_dict, False)
+            elif self.screen_cur.name == "SPlaylistScreen":
+                self.playlist_show(self.screen_cur.page, False)
+            elif self.screen_cur.name == "YPlaylistScreen":
+                self.playlist_show(self.screen_cur.page, True)
+
     def tracks_actions(self, action, youtube=False):
         if action == "download_all":
             if self.screen_cur.name == "SpotifyScreen":
@@ -532,7 +598,7 @@ class Neodeemer(MDApp):
         elif action == "download_selected":
             self.download()
         elif action == "show":
-            self.playlist_show(youtube)
+            self.playlist_show(self.screen_cur.page, youtube)
     
     def tracks_actions_show(self, show=True, playlist=False, *args):
         if playlist:
