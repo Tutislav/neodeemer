@@ -445,7 +445,8 @@ class Neodeemer(MDApp):
                         del track_dict_temp["playlist_name"]
                     if track_file_state(track_dict_temp) != TrackStates.COMPLETED:
                         if platform == "android":
-                            self.s.track_find_video_id(track_dict_temp)
+                            if track_dict_temp["state"] == TrackStates.UNKNOWN and track_dict_temp["video_id"] == None:
+                                self.s.track_find_video_id(track_dict_temp)
                             open_url("https://youtu.be/" + track_dict_temp["video_id"], platform)
                         else:
                             download_queue_info_temp = {
