@@ -58,7 +58,7 @@ def track_file_state(track_dict):
     if file_path != None:
         try:
             mtag = music_tag.load_file(file_path)
-            if (norm(mtag["artist"].value) == norm(track_dict["artist_name"]) and norm(mtag["tracktitle"].value) == norm(track_dict["track_name"])):
+            if (norm(mtag["artist"].value) == norm(track_dict["artist_name2"]) and norm(mtag["tracktitle"].value) == norm(track_dict["track_name"])):
                 if (track_dict["video_id"] != None):
                     if mtag["comment"].value == track_dict["video_id"]:
                         state = TrackStates.COMPLETED
