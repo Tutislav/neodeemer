@@ -131,14 +131,12 @@ class Neodeemer(MDApp):
         self.tracks_tab = self.screen_cur.ids.tracks_tab
         self.file_manager = MDFileManager(exit_manager=self.file_manager_close, select_path=self.file_manager_select)
         if platform == "android":
-            from android.permissions import Permission, request_permissions
             from android.storage import primary_external_storage_path
             try:
                 self.music_folder_path
             except:
                 self.music_folder_path = os.path.join(primary_external_storage_path(), "Music")
             self.file_manager_default_path = primary_external_storage_path()
-            request_permissions([Permission.WRITE_EXTERNAL_STORAGE, Permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS])
         else:
             try:
                 self.music_folder_path
@@ -726,7 +724,9 @@ if __name__ == "__main__":
     app = Neodeemer()
     if platform == "android":
         from android.storage import primary_external_storage_path
+        from android.permissions import Permission, request_permissions
         settings_folder_path = os.path.join(primary_external_storage_path(), app.loc.TITLE)
+        request_permissions([Permission.WRITE_EXTERNAL_STORAGE, Permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS])
     else:
         settings_folder_path = app.user_data_dir
     if not os.path.exists(settings_folder_path):
@@ -735,5 +735,8 @@ if __name__ == "__main__":
         except OSError:
             pass
     app.settings_file_path = os.path.join(settings_folder_path, "settings.json")
-    app.settings_load()
+    try:
+        app.settings_load()
+    except OSError:
+        pass
     app.run()
