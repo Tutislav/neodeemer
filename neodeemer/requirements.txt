@@ -1,5 +1,5 @@
 certifi==2022.5.18.1
-ffpyplayer==4.3.5
+ffpyplayer
 kivy==2.1.0
 kivymd==1.0.2
 music_tag==0.4.3

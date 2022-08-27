@@ -21,7 +21,7 @@ version.filename = %(source.dir)s/main.py
 
 # (list) Application requirements
 # comma separated e.g. requirements = sqlite3,kivy
-requirements = python3,async-timeout==4.0.2,certifi==2022.5.18.1,charset-normalizer==2.1.1,Deprecated==1.2.13,docutils==0.19,ffpyplayer==4.3.5,idna==3.3,Kivy==2.1.0,kivymd==1.0.2,music-tag==0.4.3,mutagen==1.45.1,packaging==21.3,Pillow==9.2.0,git+https://github.com/kivy/plyer@master,Pygments==2.13.0,pyparsing==3.0.9,python-dotenv==0.20.0,git+https://github.com/JosiasAurel/pytube@patch-regex,redis==4.3.4,requests==2.28.1,six==1.16.0,spotipy==2.20.0,Unidecode==1.3.4,urllib3==1.26.12,wrapt==1.14.1,youtube-search==2.1.1,yt-dlp,ytmusicapi==0.22.0
+requirements = python3,async-timeout==4.0.2,certifi==2022.5.18.1,charset-normalizer==2.1.1,Deprecated==1.2.13,docutils==0.19,ffpyplayer,idna==3.3,Kivy==2.1.0,kivymd==1.0.2,music-tag==0.4.3,mutagen==1.45.1,packaging==21.3,Pillow==9.2.0,git+https://github.com/kivy/plyer@master,Pygments==2.13.0,pyparsing==3.0.9,python-dotenv==0.20.0,git+https://github.com/JosiasAurel/pytube@patch-regex,redis==4.3.4,requests==2.28.1,six==1.16.0,spotipy==2.20.0,Unidecode==1.3.4,urllib3==1.26.12,wrapt==1.14.1,youtube-search==2.1.1,yt-dlp,ytmusicapi==0.22.0
 
 # (str) Presplash of the application
 presplash.filename = %(source.dir)s/data/presplash.png
