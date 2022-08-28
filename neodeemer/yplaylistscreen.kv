@@ -1,0 +1,82 @@
+<YPlaylistScreen>:
+    MDBoxLayout:
+        orientation: "vertical"
+
+        MDBoxLayout:
+            orientation: "vertical"
+            adaptive_height: True
+        
+            MDTopAppBar:
+                id: toolbar
+                title: app.loc.TITLE
+                right_action_items: [["menu", lambda x: app.navigation_menu.set_state("open")]]
+            
+            MDProgressBar:
+                id: progressbar
+                color: app.theme_cls.accent_dark
+
+        MDGridLayout:
+            rows: 3
+            adaptive_height: True
+            spacing: 15
+            padding: 15
+
+            MDTextField:
+                id: text_yplaylist_id
+                hint_text: app.loc.get("Link of YouTube playlist")
+                font_size: "26sp"
+                on_text_validate: app.load_in_thread(app.playlist_load, app.tracks_actions_show, load_arg=True, show_arg=True, show_arg2=True)
+                on_focus: if self.focus: app.playlist_last_menu_show(True)
+            
+            MDLabel:
+                id: label_playlist_info
+                markup: True
+
+        ScrollView:
+            id: scrollview
+            
+            MDSelectionList:
+                id: mdlist_tracks
+                on_selected: app.mdlist_selected(*args)
+                on_unselected: app.mdlist_unselected(*args)
+                on_selected_mode: app.mdlist_set_mode(*args)
+                
+        MDBoxLayout:
+            id: playlist_actions
+            orientation: "horizontal"
+            adaptive_height: True
+            adaptive_width: True
+            pos_hint: {"center_x": .5}
+            spacing: 5
+            padding: [15, 5]
+            opacity: 0
+
+            MDFillRoundFlatIconButton:
+                text: app.loc.get("Show")
+                icon: "view-list"
+                on_press: app.tracks_actions("show", True)
+            
+            MDFillRoundFlatIconButton:
+                text:  app.loc.get("All")
+                icon: "download-multiple"
+                on_press: app.tracks_actions("download_all")
+                
+        MDBoxLayout:
+            id: tracks_actions
+            orientation: "horizontal"
+            adaptive_height: True
+            adaptive_width: True
+            pos_hint: {"center_x": .5}
+            spacing: 5
+            padding: [15, 5]
+            opacity: 0
+            
+            MDFillRoundFlatIconButton:
+                text: app.loc.get("Cancel")
+                icon: "close"
+                on_press: app.mdlist_set_mode(root.ids.mdlist_tracks, 0)
+            
+            MDFillRoundFlatIconButton:
+                text: app.loc.get("Only selected")
+                icon: "download"
+                on_press: app.tracks_actions("download_selected")

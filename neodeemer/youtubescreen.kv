@@ -1,0 +1,60 @@
+<YouTubeScreen>:
+    MDBoxLayout:
+        orientation: "vertical"
+
+        MDBoxLayout:
+            orientation: "vertical"
+            adaptive_height: True
+        
+            MDTopAppBar:
+                id: toolbar
+                title: app.loc.TITLE
+                right_action_items: [["menu", lambda x: app.navigation_menu.set_state("open")]]
+            
+            MDProgressBar:
+                id: progressbar
+                color: app.theme_cls.accent_dark
+
+        MDGridLayout:
+            cols: 1
+            size_hint: 1, 0.1
+            spacing: 15
+            padding: 15
+
+            MDTextField:
+                id: text_youtube_search
+                hint_text: app.loc.get("Search video name")
+                font_size: "26sp"
+                on_text_validate: app.load_in_thread(app.youtube_load, app.playlist_show, show_arg2=True)
+
+        ScrollView:
+            MDSelectionList:
+                id: mdlist_tracks
+                on_selected: app.mdlist_selected(*args)
+                on_unselected: app.mdlist_unselected(*args)
+                on_selected_mode: app.mdlist_set_mode(*args)
+                
+        MDBoxLayout:
+            id: tracks_actions
+            orientation: "horizontal"
+            adaptive_height: True
+            adaptive_width: True
+            pos_hint: {"center_x": .5}
+            spacing: 5
+            padding: [15, 5]
+            opacity: 0
+            
+            MDFillRoundFlatIconButton:
+                text: app.loc.get("Cancel")
+                icon: "close"
+                on_press: app.mdlist_set_mode(root.ids.mdlist_tracks, 0)
+            
+            MDFillRoundFlatIconButton:
+                text:  app.loc.get("All")
+                icon: "download-multiple"
+                on_press: app.tracks_actions("download_all")
+            
+            MDFillRoundFlatIconButton:
+                text: app.loc.get("Only selected")
+                icon: "download"
+                on_press: app.tracks_actions("download_selected")

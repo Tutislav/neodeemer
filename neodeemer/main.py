@@ -11,6 +11,7 @@ from kivy.animation import Animation
 from kivy.clock import Clock
 from kivy.core.audio import SoundLoader
 from kivy.core.window import Window
+from kivy.lang import Builder
 from kivy.metrics import dp
 from kivy.properties import DictProperty
 from kivy.resources import resource_add_path, resource_find
@@ -74,7 +75,7 @@ class TracksTab(MDBoxLayout, MDTabsBase):
     page = 1
     pass
 
-class YoutubeScreen(Screen):
+class YouTubeScreen(Screen):
     pass
 
 class SPlaylistScreen(Screen):
@@ -113,15 +114,8 @@ class Neodeemer(MDApp):
         self.theme_cls.accent_dark_hue = "900"
         self.navigation_menu = self.root.ids.navigation_menu
         self.screen_manager = self.root.ids.screen_manager
-        self.screens = [
-            SpotifyScreen(name="SpotifyScreen"),
-            YoutubeScreen(name="YoutubeScreen"),
-            SPlaylistScreen(name="SPlaylistScreen"),
-            YPlaylistScreen(name="YPlaylistScreen"),
-            SettingsScreen(name="SettingsScreen")
-        ]
-        for screen in self.screens:
-            self.screen_manager.add_widget(screen)
+        self.screens = [SpotifyScreen(name="SpotifyScreen")]
+        self.screen_manager.add_widget(self.screens[0])
         Window.bind(on_keyboard=self.on_keyboard)
         self.screen_cur = self.screen_manager.current_screen
         self.toolbar = self.screen_cur.ids.toolbar
@@ -146,10 +140,11 @@ class Neodeemer(MDApp):
                     path = self.user_data_dir
                 self.music_folder_path = path
             self.file_manager_default_path = os.path.expanduser("~")
+        Clock.schedule_once(self.after_start, 2)
+        self.tab_switch(self.tracks_tab)
         return
     
-    def on_start(self):
-        self.tab_switch(self.tracks_tab)
+    def after_start(self, *args):
         self.loading = MDDialog(type="custom", content_cls=Loading(), md_bg_color=(0, 0, 0, 0))
         self.label_loading_info = self.loading.children[0].children[2].children[0].ids.label_loading_info
         self.s = SpotifyLoader(self.music_folder_path, self.create_subfolders, self.label_loading_info, self.loc.get_market())
@@ -162,21 +157,6 @@ class Neodeemer(MDApp):
         if check_update_available(__version__):
             line = TwoLineIconListItem(text=self.loc.get("Update"), secondary_text=self.loc.get("New version is available"), on_press=lambda x:open_url("https://github.com/Tutislav/neodeemer/releases/latest", platform))
             self.navigation_menu_list.add_widget(line)
-        self.text_playlist_last = self.screens[2].ids.text_splaylist_id
-        self.playlist_last_menu_list = []
-        self.playlist_last_menu = MDDropdownMenu(caller=self.text_playlist_last, items=self.playlist_last_menu_list, position="bottom", width_mult=20)
-        self.check_create_subfolders = self.screens[4].ids.check_create_subfolders
-        self.text_music_folder_path = self.screens[4].ids.text_music_folder_path
-        self.text_localization = self.screens[4].ids.text_localization
-        self.localization_menu_list = [
-            {
-                "viewclass": "OneLineListItem",
-                "height": dp(50),
-                "text": f"{lang}",
-                "on_release": lambda x=lang:self.localization_menu_set(x)
-            } for lang in self.loc.LANGUAGES.keys()
-        ]
-        self.localization_menu = MDDropdownMenu(caller=self.text_localization, items=self.localization_menu_list, position="auto", width_mult=2)
         self.submit_bug_dialog = MDDialog(
             title=self.loc.get("Submit bug"),
             text=self.loc.get("If some tracks has bad quality or even doesn't match the name you can submit it"),
@@ -187,6 +167,34 @@ class Neodeemer(MDApp):
         )
     
     def screen_switch(self, screen_name, direction="left"):
+        if not self.screen_manager.has_screen(screen_name):
+            Builder.load_file(screen_name.lower() + ".kv")
+            screen = eval(screen_name + "()")
+            screen.name = screen_name
+            self.screens.append(screen)
+            self.screen_manager.add_widget(screen)
+            if "Playlist" in screen_name:
+                if not hasattr(self, "playlist_last_menu"):
+                    if screen_name == "SPlaylistScreen":
+                        self.text_playlist_last = screen.ids.text_splaylist_id
+                    else:
+                        self.text_playlist_last = screen.ids.text_yplaylist_id
+                    self.playlist_last_menu_list = []
+                    self.playlist_last_menu = MDDropdownMenu(caller=self.text_playlist_last, items=self.playlist_last_menu_list, position="bottom", width_mult=20)
+            elif screen_name == "SettingsScreen":
+                if not hasattr(self, "localization_menu"):
+                    self.check_create_subfolders = screen.ids.check_create_subfolders
+                    self.text_music_folder_path = screen.ids.text_music_folder_path
+                    self.text_localization = screen.ids.text_localization
+                    self.localization_menu_list = [
+                        {
+                            "viewclass": "OneLineListItem",
+                            "height": dp(50),
+                            "text": f"{lang}",
+                            "on_release": lambda x=lang:self.localization_menu_set(x)
+                        } for lang in self.loc.LANGUAGES.keys()
+                    ]
+                    self.localization_menu = MDDropdownMenu(caller=self.text_localization, items=self.localization_menu_list, position="auto", width_mult=2)
         self.screen_manager.direction = direction
         self.screen_manager.current = screen_name
         self.screen_cur = self.screen_manager.current_screen

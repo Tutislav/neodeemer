@@ -1,0 +1,58 @@
+<SettingsScreen>:
+    MDBoxLayout:
+        orientation: "vertical"
+
+        MDBoxLayout:
+            orientation: "vertical"
+            adaptive_height: True
+        
+            MDTopAppBar:
+                id: toolbar
+                title: app.loc.TITLE
+                right_action_items: [["menu", lambda x: app.navigation_menu.set_state("open")]]
+            
+            MDProgressBar:
+                id: progressbar
+                color: app.theme_cls.accent_dark
+
+        MDGridLayout:
+            rows: 8
+            size_hint: 1, 0.1
+            spacing: [15, 30]
+            padding: 15
+            
+            MDGridLayout:
+                cols: 2
+
+                MDLabel:
+                    text: app.loc.get("Create subfolders")
+                
+                MDCheckbox:
+                    id: check_create_subfolders
+                    on_press: app.create_subfolders_change()
+                    active: True
+                    selected_color: app.theme_cls.accent_color
+                    unselected_color: app.theme_cls.accent_color
+
+            MDTextField:
+                id: text_music_folder_path
+                hint_text: app.loc.get("Music folder")
+                on_text_validate: app.music_folder_path_change()
+            
+            MDFillRoundFlatIconButton:
+                text: app.loc.get("Choose folder")
+                icon: "folder"
+                on_press: app.file_manager.show(app.file_manager_default_path)
+            
+            
+            MDFillRoundFlatIconButton:
+                text: app.loc.get("Toggle theme")
+                icon: "theme-light-dark"
+                on_press: app.theme_toggle()
+            
+            MDTextField:
+                id: text_localization
+                hint_text: app.loc.get("Language")
+                on_focus: if self.focus: app.localization_menu.open()
+                
+            MDBoxLayout:
