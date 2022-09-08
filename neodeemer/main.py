@@ -147,7 +147,7 @@ class Neodeemer(MDApp):
     def after_start(self, *args):
         self.loading = MDDialog(type="custom", content_cls=Loading(), md_bg_color=(0, 0, 0, 0))
         self.label_loading_info = self.loading.children[0].children[2].children[0].ids.label_loading_info
-        self.s = SpotifyLoader(self.music_folder_path, self.create_subfolders, self.label_loading_info, self.loc.get_market())
+        self.s = SpotifyLoader(self.loc.get_market(), self.music_folder_path, self.create_subfolders, self.label_loading_info, resource_find(".env"), resource_find("data/ytsfilter.json"), os.path.join(self.user_data_dir, ".cache"))
         self.y = YoutubeLoader(self.music_folder_path, self.create_subfolders, self.label_loading_info)
         self.watchdog = Thread()
         self.play_track = Thread()
@@ -201,7 +201,7 @@ class Neodeemer(MDApp):
         self.toolbar = self.screen_cur.ids.toolbar
         self.progressbar = self.screen_cur.ids.progressbar
         self.progressbar_update()
-        if (screen_name == "SettingsScreen"):
+        if screen_name == "SettingsScreen":
             if self.create_subfolders:
                 self.check_create_subfolders.active = True
             else:
@@ -496,7 +496,7 @@ class Neodeemer(MDApp):
         self.download_queue_info["downloaded_b"] = 0
         self.download_queue_info["total_b"] = 0
         self.playlist_queue = []
-        if (platform == "win"):
+        if platform == "win":
             icon_path = resource_find("data/icon.ico")
         else:
             icon_path = resource_find("data/icon.png")
@@ -719,16 +719,17 @@ class Neodeemer(MDApp):
             json.dump(data, settings_file)
         del self.s
         del self.y
-        self.s = SpotifyLoader(self.music_folder_path, self.create_subfolders, self.label_loading_info, self.loc.get_market())
+        self.s = SpotifyLoader(self.loc.get_market(), self.music_folder_path, self.create_subfolders, self.label_loading_info, resource_find(".env"), resource_find("data/ytsfilter.json"), os.path.join(self.user_data_dir, ".cache"))
         self.y = YoutubeLoader(self.music_folder_path, self.create_subfolders, self.label_loading_info)
 
 if __name__ == "__main__":
     os.environ["SSL_CERT_FILE"] = certifi.where()
     os.environ["KIVY_AUDIO"] = "ffpyplayer"
-    if hasattr(sys, '_MEIPASS'):
+    if hasattr(sys, "_MEIPASS"):
         resource_add_path(os.path.join(sys._MEIPASS))
-        import ctypes
-        ctypes.windll.user32.ShowWindow(ctypes.windll.kernel32.GetConsoleWindow(), 6)
+        if platform == "win":
+            import ctypes
+            ctypes.windll.user32.ShowWindow(ctypes.windll.kernel32.GetConsoleWindow(), 6)
     app = Neodeemer()
     if platform == "android":
         from android.storage import primary_external_storage_path

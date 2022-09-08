@@ -1,15 +1,11 @@
 import json
 import os
-import sys
 from datetime import datetime
 from time import sleep
 from urllib import request
 
 import spotipy
 from dotenv import load_dotenv
-from kivy.resources import resource_find
-from kivy.utils import platform
-from kivymd.uix.label import MDLabel
 from pytube import Playlist as YoutubePlaylist
 from spotipy.oauth2 import SpotifyClientCredentials
 from yt_dlp import YoutubeDL
@@ -19,6 +15,9 @@ from ytmusicapi import YTMusic
 from tools import (TrackStates, contains_date, contains_separate_word, contains_part, mstostr, norm, strtoms,
                    track_file_state)
 
+
+class MDLabel():
+    text = ""
 
 class SpotifyFix(spotipy.Spotify):
     def artist(self, artist: dict):
@@ -33,36 +32,36 @@ class SpotifyFix(spotipy.Spotify):
             }
 
 class Base():
-    def __init__(self, music_folder_path: str, create_subfolders: bool, label_loading_info: MDLabel):
+    def __init__(self, music_folder_path: str, create_subfolders: bool, label_loading_info: MDLabel = None):
         self.music_folder_path = music_folder_path
         self.create_subfolders = create_subfolders
-        self.label_loading_info = label_loading_info
+        if label_loading_info != None:
+            self.label_loading_info = label_loading_info
+        else:
+            self.label_loading_info = MDLabel()
 
 class SpotifyLoader(Base):
-    def __init__(self, music_folder_path: str, create_subfolders: bool, label_loading_info: MDLabel, market: str):
+    def __init__(self, market: str, music_folder_path: str, create_subfolders: bool, label_loading_info: MDLabel = None, env_file_path: str = ".env", filter_file_path: str = "data/ytsfilter.json", cache_file_path: str = ".cache"):
         super().__init__(music_folder_path, create_subfolders, label_loading_info)
-        if platform == "android":
+        if os.path.exists("env.env"):
             load_dotenv("env.env")
         else:
-            load_dotenv(resource_find(".env"))
-        self.spotify = SpotifyFix(client_credentials_manager=SpotifyClientCredentials())
+            load_dotenv(env_file_path)
+        self.spotify = SpotifyFix(client_credentials_manager=SpotifyClientCredentials(cache_handler=spotipy.CacheFileHandler(cache_path=cache_file_path)))
         self.limit_small = 10
         self.limit = 50
         self.market = market
+        self.filter_file_path = filter_file_path
         self.youtube_api_key = os.environ.get("YOUTUBE_API_KEY")
         self.load_filter()
     
     def load_filter(self):
-        if hasattr(sys, '_MEIPASS'):
-            filter_file_path = os.path.join(sys._MEIPASS, "data", "ytsfilter.json")
-        else:
-            filter_file_path = resource_find("data/ytsfilter.json")
         try:
-            request.urlretrieve("https://raw.githubusercontent.com/Tutislav/neodeemer/main/neodeemer/data/ytsfilter.json", filter_file_path)
+            request.urlretrieve("https://raw.githubusercontent.com/Tutislav/neodeemer/main/neodeemer/data/ytsfilter.json", self.filter_file_path)
         except:
             pass
-        if os.path.exists(filter_file_path):
-            with open(filter_file_path, "r") as filter_file:
+        if os.path.exists(self.filter_file_path):
+            with open(self.filter_file_path, "r") as filter_file:
                 self.ytsfilter = json.load(filter_file)
     
     def select_image(self, images):
