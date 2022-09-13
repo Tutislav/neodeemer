@@ -20,16 +20,23 @@ class MDLabel():
     text = ""
 
 class SpotifyFix(spotipy.Spotify):
+    artists_cache = {}
+
     def artist(self, artist: dict):
-        try:
-            return super().artist(artist["id"])
-        except:
-            return {
-                "id": artist["id"],
-                "name": artist["name"],
-                "images": [],
-                "genres": []
-            }
+        if not artist["id"] in self.artists_cache:
+            try:
+                artist_dict = super().artist(artist["id"])
+            except:
+                artist_dict = {
+                    "id": artist["id"],
+                    "name": artist["name"],
+                    "images": [],
+                    "genres": []
+                }
+            self.artists_cache.update({artist["id"]: artist_dict})
+        else:
+            artist_dict = self.artists_cache[artist["id"]]
+        return artist_dict
 
 class Base():
     def __init__(self, music_folder_path: str, create_subfolders: bool, label_loading_info: MDLabel = None):
