@@ -460,7 +460,7 @@ class Neodeemer(MDApp):
                                 "downloaded_b": 0,
                                 "total_b": 0
                             }
-                            Download(track_dict_temp, self.s, download_queue_info_temp).download_track()
+                            Download(track_dict_temp, self.s, download_queue_info_temp, False).download_track()
                         widget.parent.parent.parent.children[1].track_dict["video_id"] = track_dict_temp["video_id"]
                         widget.parent.parent.parent.children[1].track_dict["age_restricted"] = track_dict_temp["age_restricted"]
                         widget.parent.parent.parent.children[1].track_dict["state"] = TrackStates.FOUND
@@ -485,7 +485,7 @@ class Neodeemer(MDApp):
     
     def watchdog_progress(self):
         for track in self.playlist_queue:
-            Download(track, self.s, self.download_queue_info).playlist_file_save()
+            Download(track, self.s, self.download_queue_info, False).playlist_file_save()
         while self.download_queue_info["position"] != len(self.download_queue):
             Clock.schedule_once(self.progressbar_update)
             sleep(0.5)

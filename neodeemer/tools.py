@@ -28,6 +28,19 @@ def norm(text, keepdiacritic=False, keepcase=False):
         text = text.lower()
     return text
 
+def clean_track_name(track_name):
+    endings = ["original", "from", "remastered", "remake", "remaster", "music", "radio", "mix"]
+    track_name = track_name.lower()
+    for ending in endings:
+        if " - " in track_name and ending in track_name:
+            if track_name.count(" - ") > 1:
+                track_name = track_name[0:track_name.find(" - ", track_name.find(" - ") + 1)]
+            else:
+                track_name = track_name[0:track_name.find(" - ")]
+    if " (" in track_name:
+        track_name = track_name[0:track_name.find(" (")]
+    return track_name
+
 def mstostr(ms):
     min = round(ms / 1000 / 60)
     sec = round(ms / 1000 % 60)
@@ -106,14 +119,32 @@ def contains_separate_word(text, word, max_position=None):
             contains = False
     return contains
 
-def contains_part(text, compare_text):
+def contains_part(text, compare_text, compare_chars=False):
+    contains = False
+    text2 = text
     compare_text2 = compare_text.split()
-    parts_half = len(compare_text2) / 2
+    if compare_chars and len(compare_text2) <= 2:
+        compare_text2 = []
+        i = 0
+        while i < len(compare_text) - 1:
+            compare_text2.append(compare_text[i:i + 2])
+            i += 2
+        if len(compare_text) % 2 != 0:
+            compare_text2.append(compare_text[len(compare_text) - 1])
+        parts_half = len(compare_text2) * (2 / 3)
+    else:
+        parts_half = len(compare_text2) / 2
     parts_count = 0
     for word in compare_text2:
-        if word in text:
+        if word in text2:
+            text2 = text2[text2.find(word) + len(word):len(text2)]
             parts_count += 1
-    return parts_count > parts_half
+            contains = parts_count > parts_half
+            if contains:
+                break
+    if not compare_chars and not contains and len(compare_text2) <= 2:
+        contains = contains_part(text, compare_text, True)
+    return contains
 
 def contains_date(text, compare_text=None):
     contains = False
@@ -148,6 +179,35 @@ def contains_date(text, compare_text=None):
                     contains = True
             except:
                 pass
+    return contains
+
+def contains_artist_track(text, artist_name=None, track_name=None):
+    contains = False
+    if " - " in text:
+        text2 = text.split(" - ")
+        text_artist = norm(text2[0])
+        text_track = norm(clean_track_name(text2[1]))
+    else:
+        text = norm(clean_track_name(text))
+        text_artist = text
+        text_track = text
+    if artist_name != None:
+        if "; " in artist_name:
+            artists = artist_name.split("; ")
+        else:
+            artists = [norm(artist_name)]
+    else:
+        artists = [""]
+    if track_name != None:
+        track_name = norm(clean_track_name(track_name))
+    else:
+        track_name = ""
+    for artist in artists:
+        artist = norm(artist)
+        if artist in text_artist or contains_part(text_artist, artist):
+            if track_name in text_track or contains_part(text_track, track_name):
+                contains = True
+                break
     return contains
 
 def open_url(url, platform):

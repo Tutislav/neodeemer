@@ -8,16 +8,20 @@ import requests
 from pytube import YouTube
 from yt_dlp import YoutubeDL
 
+from lyrics import Lyrics
 from songinfoloader import SpotifyLoader
 from tools import HEADERS, TrackStates
 
 
 class Download():
-    def __init__(self, track_dict: dict, spotifyloader: SpotifyLoader, download_queue_info: dict):
+    def __init__(self, track_dict: dict, spotifyloader: SpotifyLoader, download_queue_info: dict, save_lyrics: bool = True):
         self.track_dict = track_dict
         self.spotifyloader = spotifyloader
         self.download_queue_info = download_queue_info
         self.downloaded_bytes_prev = 0
+        self.save_lyrics = save_lyrics
+        if self.save_lyrics:
+            self.lyrics = Lyrics()
         
     def download_on_progress(self, stream=None, chunk=None, bytes_remaining=None):
         if type(stream) is dict:
@@ -74,6 +78,11 @@ class Download():
             mtag["tracktitle"] = self.track_dict["track_name"]
             mtag["tracknumber"] = self.track_dict["track_number"]
             mtag["comment"] = self.track_dict["video_id"]
+            if self.save_lyrics:
+                try:
+                    mtag["lyrics"] = self.lyrics.find_lyrics(self.track_dict)
+                except:
+                    pass
             mtag.save()
         except:
             self.track_dict["state"] = TrackStates.FOUND
