@@ -29,7 +29,7 @@
                 on_text_validate: app.load_in_thread(app.youtube_load, app.playlist_show, show_arg2=True)
 
         ScrollView:
-            MDSelectionList:
+            MDSelectionListFix:
                 id: mdlist_tracks
                 on_selected: app.mdlist_selected(*args)
                 on_unselected: app.mdlist_unselected(*args)

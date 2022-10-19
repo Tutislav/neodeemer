@@ -28,6 +28,7 @@ from kivymd.uix.list import (IconLeftWidget, IconRightWidget, ILeftBody,
                              OneLineAvatarIconListItem,
                              TwoLineAvatarIconListItem, TwoLineIconListItem)
 from kivymd.uix.menu import MDDropdownMenu
+from kivymd.uix.selection import MDSelectionList
 from kivymd.uix.snackbar import Snackbar
 from kivymd.uix.tab import MDTabsBase
 from plyer import notification
@@ -42,6 +43,13 @@ __version__ = "0.4"
 
 class Loading(MDFloatLayout):
     pass
+
+class MDSelectionListFix(MDSelectionList):
+    def add_widget(self, widget, index=0, canvas=None):
+        super().add_widget(widget, index, canvas)
+        selection_icon = widget.parent.children[0]
+        widget.parent.remove_widget(selection_icon)
+        widget.parent.add_widget(selection_icon, 1)
 
 class AsyncImageLeftWidget(ILeftBody, AsyncImage):
     pass
@@ -440,8 +448,9 @@ class Neodeemer(MDApp):
         Clock.schedule_once(self.loading.open)
         try:
             if widget.children[0].icon == "play-circle-outline":
+                track_dict = widget.parent.parent.parent.children[0].track_dict
                 track_dict_temp = {}
-                track_dict_temp.update(widget.parent.parent.parent.children[1].track_dict)
+                track_dict_temp.update(track_dict)
                 if track_dict_temp["state"] != TrackStates.COMPLETED:
                     track_dict_temp["forcedmp3"] = False
                     track_dict_temp["folder_path"] = self.user_data_dir
@@ -461,9 +470,9 @@ class Neodeemer(MDApp):
                                 "total_b": 0
                             }
                             Download(track_dict_temp, self.s, download_queue_info_temp, False).download_track()
-                        widget.parent.parent.parent.children[1].track_dict["video_id"] = track_dict_temp["video_id"]
-                        widget.parent.parent.parent.children[1].track_dict["age_restricted"] = track_dict_temp["age_restricted"]
-                        widget.parent.parent.parent.children[1].track_dict["state"] = TrackStates.FOUND
+                        track_dict["video_id"] = track_dict_temp["video_id"]
+                        track_dict["age_restricted"] = track_dict_temp["age_restricted"]
+                        track_dict["state"] = TrackStates.FOUND
                 if self.sound != None:
                     self.sound.stop()
                     self.sound_prev_widget.children[0].icon = "play-circle-outline"
@@ -529,9 +538,10 @@ class Neodeemer(MDApp):
     
     def mdlist_selected(self, instance_selection_list, instance_selection_item):
         self.toolbar.title = str(len(instance_selection_list.get_selected_list_items()))
-        if hasattr(instance_selection_item.children[1], "track_dict"):
-            if not instance_selection_item.children[1].track_dict in self.selected_tracks:
-                self.selected_tracks.append(instance_selection_item.children[1].track_dict)
+        line = instance_selection_item.children[0]
+        if hasattr(line, "track_dict"):
+            if not line.track_dict in self.selected_tracks:
+                self.selected_tracks.append(line.track_dict)
         else:
             instance_selection_item.do_unselected_item()
             if not instance_selection_list.get_selected_list_items():
@@ -542,9 +552,10 @@ class Neodeemer(MDApp):
             self.toolbar.title = str(len(instance_selection_list.get_selected_list_items()))
         else:
             self.toolbar.title = self.loc.TITLE
-        if hasattr(instance_selection_item.children[1], "track_dict"):
-            if instance_selection_item.children[1].track_dict in self.selected_tracks:
-                self.selected_tracks.remove(instance_selection_item.children[1].track_dict)
+        line = instance_selection_item.children[0]
+        if hasattr(line, "track_dict"):
+            if line.track_dict in self.selected_tracks:
+                self.selected_tracks.remove(line.track_dict)
     
     def mdlist_set_mode(self, instance_selection_list, mode, *args):
         if mode:
