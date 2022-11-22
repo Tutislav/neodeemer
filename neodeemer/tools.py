@@ -154,8 +154,17 @@ def contains_date(text, compare_text=None):
         "%d/%m/%Y",
         "%d/%m/%y",
         "%d.%m.%Y",
-        "%d.%m.%y"
+        "%d.%m.%y",
+        "%d %b %Y",
+        "%d %B %Y",
+        "%m.%d.%Y",
+        "%m.%d.%y",
+        "%Y-%m-%d",
+        "%y-%m-%d",
+        "%Y/%m/%d",
+        "%y/%m/%d"
     ]
+    dates = []
     for i, char in enumerate(text):
         if char.isdigit():
             if date_start_position == -1:
@@ -164,21 +173,27 @@ def contains_date(text, compare_text=None):
                 date_end_position = i
             if date_end_position - date_start_position > 10:
                 date_start_position = date_end_position
-    if date_end_position - date_start_position > 5 and date_end_position - date_start_position < 11:
-        date = text[date_start_position:date_end_position + 1]
-        for date_format in date_formats:
-            try:
-                datetime.strptime(date, date_format)
-                contains = True
-            except:
-                continue
-        if compare_text != None:
-            try:
-                datetime.strptime(date, "%Y")
-                if not date in compare_text:
+        elif all(char != c for c in ["/", ".", "-", " "]) and date_end_position - date_start_position > 3:
+            dates.append(text[date_start_position:date_end_position + 1])
+            date_start_position = date_end_position
+        if date_end_position == (len(text) - 1) and date_end_position - date_start_position > 3:
+            dates.append(text[date_start_position:date_end_position + 1])
+    if len(dates) > 0:
+        for date in dates:
+            for date_format in date_formats:
+                try:
+                    datetime.strptime(date, date_format)
                     contains = True
-            except:
-                pass
+                    break
+                except:
+                    continue
+            if compare_text != None:
+                try:
+                    datetime.strptime(date, "%Y")
+                    if not date in compare_text:
+                        contains = True
+                except:
+                    pass
     return contains
 
 def contains_artist_track(text, artist_name=None, track_name=None):

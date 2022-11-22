@@ -12,7 +12,7 @@ from yt_dlp import YoutubeDL
 from youtube_search import YoutubeSearch
 from ytmusicapi import YTMusic
 
-from tools import (TrackStates, contains_date, contains_separate_word, contains_part, mstostr, norm, strtoms,
+from tools import (TrackStates, contains_artist_track, contains_date, contains_separate_word, contains_part, mstostr, norm, strtoms,
                    track_file_state)
 
 
@@ -237,6 +237,21 @@ class SpotifyLoader(Base):
                 pass
         return list
     
+    def video_get_details(self, video_dict):
+        try:
+            details_url = "https://youtube.googleapis.com/youtube/v3/videos?part=snippet,contentDetails&id=" + video_dict["id"] + "&key=" + self.youtube_api_key
+            with request.urlopen(details_url) as urldata:
+                details_data = json.loads(urldata.read().decode())
+                video_description = details_data["items"][0]["snippet"]["description"]
+                video_details = details_data["items"][0]["contentDetails"]
+                video_dict["video_details"] = video_details
+        except:
+            video_url = "https://youtu.be/" + video_dict["id"]
+            with YoutubeDL() as ydl:
+                video_info = ydl.extract_info(video_url, False)
+                video_description = video_info["description"]
+        video_dict["video_description"] = norm(video_description)
+    
     def track_find_video_id(self, track_dict):
         track_dict["state"] = TrackStates.SEARCHING
         preferred_channels = self.ytsfilter["preferred_channels"]
@@ -257,8 +272,8 @@ class SpotifyLoader(Base):
                     track = tracks[0]
                     track_artist = norm(track["artists"][0]["name"])
                     track_name = norm(track["title"])
-                    if artist_name2 in track_artist or contains_part(track_artist, artist_name2):
-                        if track_name2 in track_name or contains_part(track_name, track_name2):
+                    if contains_artist_track(track_artist, artist_name2):
+                        if contains_artist_track(track_name, track_name=track_name2):
                             video_id = track["videoId"]
                 if video_id == None:
                     album_text = track_dict["artist_name"] + " " + track_dict["album_name"]
@@ -267,13 +282,13 @@ class SpotifyLoader(Base):
                         album = albums[0]
                         album_artist = norm(album["artists"][0]["name"])
                         album_name = norm(album["title"])
-                        if artist_name2 in album_artist or contains_part(album_artist, artist_name2):
+                        if contains_artist_track(album_artist, artist_name2):
                             if album_name2 in album_name or contains_part(album_name, album_name2):
                                 album2 = ytmusic.get_album(album["browseId"])
                                 tracks = album2["tracks"]
                                 for track in tracks:
                                     track_name = norm(track["title"])
-                                    if track_name2 in track_name or contains_part(track_name, track_name2):
+                                    if contains_artist_track(track_name, track_name=track_name2):
                                         contains_excluded = False
                                         for word in excluded_words:
                                             if word in track_name and not word in track_name2:
@@ -298,86 +313,67 @@ class SpotifyLoader(Base):
             for video in videos:
                 video_channel = norm(video["channel"])
                 video_title = norm(video["title"])
-                video_duration_s = strtoms(video["duration"]) / 1000
-                video_views = video["views"].encode().decode("utf-8")
-                video_views = int("".join([c for c in video_views if c.isdigit()]).rstrip())
+                if type(video["duration"]) is int:
+                    video_duration_s = video["duration"]
+                else:
+                    video_duration_s = strtoms(video["duration"]) / 1000
+                if type(video["views"]) is int:
+                    video_views = video["views"]
+                else:
+                    video_views = video["views"].encode().decode("utf-8")
+                    video_views = int("".join([c for c in video_views if c.isdigit()]).rstrip())
                 video["video_channel"] = video_channel
                 video["video_title"] = video_title
                 video["video_description"] = ""
                 video["video_details"] = ""
-                if video_views > 300:
-                    if track_name2 in video_title or contains_part(video_title, track_name2):
-                        if track_name2 == artist_name2:
-                            if not video_title.count(artist_name2) == 2:
+                if video_views > 300 and video_duration_s >= (track_duration_s - 150) and video_duration_s <= (track_duration_s + 150):
+                    self.video_get_details(video)
+                    video_description = video["video_description"]
+                    video_details = video["video_details"]
+                    if "contentRating" in video_details:
+                        content_rating = video_details["contentRating"]
+                        if "ytRating" in content_rating:
+                            if content_rating["ytRating"] == "ytAgeRestricted":
                                 continue
-                        contains_excluded = False
-                        for word in excluded_words:
-                            if word in video_title and not word in track_name2:
-                                if contains_separate_word(video_title, word):
-                                    contains_excluded = True
-                                    break
-                        if contains_date(video["title"], track_name2):
-                            contains_excluded = True
-                        if contains_excluded:
-                            continue
-                        try:
-                            details_url = "https://youtube.googleapis.com/youtube/v3/videos?part=snippet,contentDetails&id=" + video["id"] + "&key=" + self.youtube_api_key
-                            with request.urlopen(details_url) as urldata:
-                                details_data = json.loads(urldata.read().decode())
-                                video_description = details_data["items"][0]["snippet"]["description"]
-                                video_details = details_data["items"][0]["contentDetails"]
-                                video["video_details"] = video_details
-                                if "contentRating" in video_details:
-                                    content_rating = video_details["contentRating"]
-                                    if "ytRating" in content_rating:
-                                        if content_rating["ytRating"] == "ytAgeRestricted":
-                                            continue
-                        except:
-                            video_url = "https://youtu.be/" + self.track_dict["video_id"]
-                            with YoutubeDL() as ydl:
-                                video_info = ydl.extract_info(video_url, False)
-                                video_description = video_info["description"]
-                        video_description = norm(video_description)
-                        video["video_description"] = video_description
-                        if artist_name2 in video_title or artist_name2 in video_channel or artist_name2 in video_description:
-                            if not artist_name2 in video_channel and not any(word in video_channel for word in preferred_channels):
-                                if not "provide to youtube" in video_description and not "taken from the album" in video_description:
-                                    contains_excluded = False
-                                    for word in excluded_words:
-                                        if word in video_description:
-                                            if contains_separate_word(video_description, word, 100):
-                                                contains_excluded = True
-                                                break
-                                    if contains_excluded:
-                                        continue
-                            if video_duration_s >= (track_duration_s - 150) and video_duration_s <= (track_duration_s + 150) and not any(word in video_channel for word in excluded_channels):
-                                suitable_videos.append(video)
-            for video in suitable_videos:
-                if "provided to youtube" in video["video_description"]:
-                    video_id = video["id"]
-                    break
-            if video_id == None:
-                for video in suitable_videos:
-                    if any(word in video["video_channel"] for word in preferred_channels):
-                        video_id = video["id"]
-                        break
-                    elif artist_name2 in video["video_channel"]:
-                        video_id = video["id"]
-                        break
-                    elif "taken from the album" in video["video_description"]:
-                        video_id = video["id"]
-                        break
-            if video_id == None:
-                for video in suitable_videos:
-                    if artist_name2 in video["video_title"]:
-                        video_id = video["id"]
-                        break
+                    if contains_artist_track(video_title, artist_name2, track_name2) or contains_artist_track(video_channel, artist_name2) or contains_artist_track(video_description, artist_name2):
+                        if contains_artist_track(video_title, track_name=track_name2):
+                            if track_name2 == artist_name2:
+                                if not video_title.count(artist_name2) == 2:
+                                    continue
+                            if contains_date(video["title"], track_name2):
+                                continue
+                            if any(word in video_channel for word in excluded_channels):
+                                continue
+                            contains_excluded = False
+                            for word in excluded_words:
+                                if word in video_title and not word in track_name2:
+                                    if contains_separate_word(video_title, word):
+                                        contains_excluded = True
+                                        break
+                                if word in video_description:
+                                    if contains_separate_word(video_description, word, 100):
+                                        contains_excluded = True
+                                        break
+                            if contains_excluded:
+                                continue
+                            if "provided to youtube" in video["video_description"] or "taken from the album" in video["video_description"]:
+                                priority = 0
+                            elif artist_name2 in video["video_channel"] or any(word in video["video_channel"] for word in preferred_channels):
+                                priority = 1
+                            elif artist_name2 in video["video_title"]:
+                                priority = 2
+                            else:
+                                priority = 3
+                            suitable_videos.append([video, priority])
+            if len(suitable_videos) > 0:
+                suitable_videos = sorted(suitable_videos, key=lambda x:x[1])
+                video_id = suitable_videos[0][0]["id"]
             if video_id == None:
                 if max_results < 10:
                     max_results = 10
                     continue
                 if len(suitable_videos) > 0:
-                    video_id = suitable_videos[0]["id"]
+                    video_id = suitable_videos[0][0]["id"]
                 else:
                     video_id = videos[0]["id"]
                     video_details = videos[0]["video_details"]
