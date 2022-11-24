@@ -17,10 +17,30 @@
                 color: app.theme_cls.accent_dark
 
         MDGridLayout:
-            rows: 8
+            rows: 9
             size_hint: 1, 0.1
             spacing: [15, 30]
             padding: 15
+            
+            MDGridLayout:
+                cols: 4
+                spacing: 15
+
+                MDLabel:
+                    text: app.loc.get("Format")
+
+                MDLabel:
+                    text: app.loc.get("M4A")
+                    halign: "right"
+                
+                MDSwitch:
+                    id: switch_format
+                    active: app.format_mp3
+                    width: dp(64)
+                    on_active: app.format_change()
+                
+                MDLabel:
+                    text: app.loc.get("MP3")
             
             MDGridLayout:
                 cols: 2
@@ -31,9 +51,9 @@
                 MDCheckbox:
                     id: check_create_subfolders
                     on_press: app.create_subfolders_change()
-                    active: True
-                    selected_color: app.theme_cls.accent_color
-                    unselected_color: app.theme_cls.accent_color
+                    active: app.create_subfolders
+                    color_active: app.theme_cls.accent_color
+                    color_inactive: app.theme_cls.accent_color
 
             MDTextField:
                 id: text_music_folder_path

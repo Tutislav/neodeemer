@@ -20,8 +20,8 @@ class TestPlaylistDownload(unittest.TestCase):
         "total_b": 0
     }
     music_folder_path = tempfile.mkdtemp()
-    s = SpotifyLoader("CZ", music_folder_path, True)
-    y = YoutubeLoader(music_folder_path, True)
+    s = SpotifyLoader("CZ", music_folder_path, False, True)
+    y = YoutubeLoader(music_folder_path, False, True)
     s_playlist_id = "https://open.spotify.com/playlist/37i9dQZF1DWXRqgorJj26U?si=5061e09bcd6a41cc"
     y_playlist_url = "https://www.youtube.com/playlist?list=PLvyEB5k0wSw6cy8ARt5c-VoyfNIe5udfd"
     tracks = []

@@ -39,8 +39,9 @@ class SpotifyFix(spotipy.Spotify):
         return artist_dict
 
 class Base():
-    def __init__(self, music_folder_path: str, create_subfolders: bool, label_loading_info: MDLabel = None):
+    def __init__(self, music_folder_path: str, format_mp3: bool, create_subfolders: bool, label_loading_info: MDLabel = None):
         self.music_folder_path = music_folder_path
+        self.format_mp3 = format_mp3
         self.create_subfolders = create_subfolders
         if label_loading_info != None:
             self.label_loading_info = label_loading_info
@@ -48,8 +49,8 @@ class Base():
             self.label_loading_info = MDLabel()
 
 class SpotifyLoader(Base):
-    def __init__(self, market: str, music_folder_path: str, create_subfolders: bool, label_loading_info: MDLabel = None, env_file_path: str = ".env", filter_file_path: str = "data/ytsfilter.json", cache_file_path: str = ".cache"):
-        super().__init__(music_folder_path, create_subfolders, label_loading_info)
+    def __init__(self, market: str, music_folder_path: str, format_mp3: bool, create_subfolders: bool, label_loading_info: MDLabel = None, env_file_path: str = ".env", filter_file_path: str = "data/ytsfilter.json", cache_file_path: str = ".cache"):
+        super().__init__(music_folder_path, format_mp3, create_subfolders, label_loading_info)
         if os.path.exists("env.env"):
             load_dotenv("env.env")
         else:
@@ -148,7 +149,7 @@ class SpotifyLoader(Base):
             "track_size_b": None,
             "track_size_added": False,
             "video_id": None,
-            "forcedmp3": False,
+            "forcedmp3": self.format_mp3,
             "age_restricted": False,
             "folder_path": folder_path,
             "file_path": file_path,
@@ -414,7 +415,7 @@ class YoutubeLoader(Base):
             "track_size_b": None,
             "track_size_added": False,
             "video_id": video_id,
-            "forcedmp3": False,
+            "forcedmp3": self.format_mp3,
             "age_restricted": False,
             "folder_path": self.music_folder_path,
             "file_path": file_path,

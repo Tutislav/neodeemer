@@ -100,6 +100,7 @@ class SettingsScreen(Screen):
 class Neodeemer(MDApp):
     icon = "data/icon.png"
     loc = Localization()
+    format_mp3 = False
     create_subfolders = True
     selected_tracks = []
     download_queue = []
@@ -155,8 +156,8 @@ class Neodeemer(MDApp):
     def after_start(self, *args):
         self.loading = MDDialog(type="custom", content_cls=Loading(), md_bg_color=(0, 0, 0, 0))
         self.label_loading_info = self.loading.children[0].children[2].children[0].ids.label_loading_info
-        self.s = SpotifyLoader(self.loc.get_market(), self.music_folder_path, self.create_subfolders, self.label_loading_info, resource_find(".env"), resource_find("data/ytsfilter.json"), os.path.join(self.user_data_dir, ".cache"))
-        self.y = YoutubeLoader(self.music_folder_path, self.create_subfolders, self.label_loading_info)
+        self.s = SpotifyLoader(self.loc.get_market(), self.music_folder_path, self.format_mp3, self.create_subfolders, self.label_loading_info, resource_find(".env"), resource_find("data/ytsfilter.json"), os.path.join(self.user_data_dir, ".cache"))
+        self.y = YoutubeLoader(self.music_folder_path, self.format_mp3, self.create_subfolders, self.label_loading_info)
         self.watchdog = Thread()
         self.play_track = Thread()
         for i in range(1, 6):
@@ -191,6 +192,7 @@ class Neodeemer(MDApp):
                     self.playlist_last_menu = MDDropdownMenu(caller=self.text_playlist_last, items=self.playlist_last_menu_list, position="bottom", width_mult=20)
             elif screen_name == "SettingsScreen":
                 if not hasattr(self, "localization_menu"):
+                    self.switch_format = screen.ids.switch_format
                     self.check_create_subfolders = screen.ids.check_create_subfolders
                     self.text_music_folder_path = screen.ids.text_music_folder_path
                     self.text_localization = screen.ids.text_localization
@@ -210,10 +212,6 @@ class Neodeemer(MDApp):
         self.progressbar = self.screen_cur.ids.progressbar
         self.progressbar_update()
         if screen_name == "SettingsScreen":
-            if self.create_subfolders:
-                self.check_create_subfolders.active = True
-            else:
-                self.check_create_subfolders.active = False
             self.text_music_folder_path.text = self.music_folder_path
             self.text_localization.text = self.loc.get_lang()
     
@@ -660,11 +658,12 @@ class Neodeemer(MDApp):
         else:
             self.load_in_thread(self.playlist_load, self.tracks_actions_show, show_arg=True, show_arg2=True)
 
+    def format_change(self):
+        self.format_mp3 = self.switch_format.active
+        self.settings_save()
+
     def create_subfolders_change(self):
-        if self.check_create_subfolders.active:
-            self.create_subfolders = True
-        else:
-            self.create_subfolders = False
+        self.create_subfolders = self.check_create_subfolders.active
         self.settings_save()
     
     def music_folder_path_change(self):
@@ -710,6 +709,8 @@ class Neodeemer(MDApp):
             with open(self.settings_file_path, "r") as settings_file:
                 data = json.load(settings_file)
                 self.music_folder_path = data["music_folder_path"]
+                if "format_mp3" in data:
+                    self.format_mp3 = data["format_mp3"]
                 self.create_subfolders = data["create_subfolders"]
                 self.theme_cls.theme_style = data["theme"]
                 self.loc.set_lang(data["lang"])
@@ -722,6 +723,7 @@ class Neodeemer(MDApp):
         with open(self.settings_file_path, "w") as settings_file:
             data = {
                 "music_folder_path": self.music_folder_path,
+                "format_mp3": self.format_mp3,
                 "create_subfolders": self.create_subfolders,
                 "theme": self.theme_cls.theme_style,
                 "lang": self.loc.get_lang(),
@@ -730,8 +732,8 @@ class Neodeemer(MDApp):
             json.dump(data, settings_file)
         del self.s
         del self.y
-        self.s = SpotifyLoader(self.loc.get_market(), self.music_folder_path, self.create_subfolders, self.label_loading_info, resource_find(".env"), resource_find("data/ytsfilter.json"), os.path.join(self.user_data_dir, ".cache"))
-        self.y = YoutubeLoader(self.music_folder_path, self.create_subfolders, self.label_loading_info)
+        self.s = SpotifyLoader(self.loc.get_market(), self.music_folder_path, self.format_mp3, self.create_subfolders, self.label_loading_info, resource_find(".env"), resource_find("data/ytsfilter.json"), os.path.join(self.user_data_dir, ".cache"))
+        self.y = YoutubeLoader(self.music_folder_path, self.format_mp3, self.create_subfolders, self.label_loading_info)
 
 if __name__ == "__main__":
     os.environ["SSL_CERT_FILE"] = certifi.where()

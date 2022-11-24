@@ -94,6 +94,7 @@ class Download():
     def download_file(self, url, file_path):
         with open(file_path, "wb") as file:
             response = requests.get(url, headers=HEADERS, stream=True)
+            self.total_b_add(len(response.content))
             for data in response.iter_content(4096):
                 file.write(data)
                 self.download_on_progress(chunk=data)
@@ -132,7 +133,13 @@ class Download():
             self.download_file(youtube_video.url, self.track_dict["file_path"])
         self.track_dict["state"] = TrackStates.SAVED
     
-    def download_mp3(self):
+    def download_mp3_neodeemer(self):
+        mp3_url = "https://neodeemer.vorpal.tk/mp3.php?video_id=" + self.track_dict["video_id"]
+        self.track_dict["state"] = TrackStates.DOWNLOADING
+        self.download_file(mp3_url, self.track_dict["file_path2"])
+        self.track_dict["state"] = TrackStates.SAVED
+
+    def download_mp3_vevioz(self):
         class Mp3UrlParser(HTMLParser):
             list = []
             def handle_starttag(self, tag, attrs):
@@ -159,9 +166,6 @@ class Download():
                     mp3_url = mp3urlparser.to_list()[2]
             except:
                 sleep(2)
-        response = requests.get(mp3_url, headers=HEADERS, stream=True)
-        self.total_b_add(len(response.content))
-        del response
         self.track_dict["state"] = TrackStates.DOWNLOADING
         self.download_file(mp3_url, self.track_dict["file_path2"])
         self.track_dict["state"] = TrackStates.SAVED
@@ -171,13 +175,18 @@ class Download():
         if self.track_dict["state"] == TrackStates.UNKNOWN and self.track_dict["video_id"] == None:
             self.spotifyloader.track_find_video_id(self.track_dict)
         if self.track_dict["state"] == TrackStates.FOUND:
-            try:
-                self.download_m4a_youtube_dl()
-            except:
+            if not self.track_dict["forcedmp3"]:
                 try:
-                    self.download_m4a_pytube()
+                    self.download_m4a_youtube_dl()
                 except:
-                    self.track_dict["forcedmp3"] = True
-                    self.download_mp3()
+                    try:
+                        self.download_m4a_pytube()
+                    except:
+                        self.track_dict["forcedmp3"] = True
+            else:
+                try:
+                    self.download_mp3_neodeemer()
+                except:
+                    self.download_mp3_vevioz()
         if self.track_dict["state"] == TrackStates.SAVED:
             self.save_tags()

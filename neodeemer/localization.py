@@ -40,6 +40,7 @@ CZ = {
     #playlist_actions
     "Show": "Zobrazit",
     #SettingsScreen
+    "Format": "Formát",
     "Create subfolders": "Vytvářet podsložky",
     "Music folder": "Složka, do které se ukládá hudba",
     "Choose folder": "Vybrat složku",
@@ -82,5 +83,7 @@ class Localization():
     def get(self, text):
         if self.lang == "en_US":
             return text
-        else:
+        elif text in self.LANGUAGES[self.lang]:
             return self.LANGUAGES[self.lang][text]
+        else:
+            return text

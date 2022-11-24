@@ -20,8 +20,8 @@ class TestSearchDownload(unittest.TestCase):
         "total_b": 0
     }
     music_folder_path = tempfile.mkdtemp()
-    s = SpotifyLoader("CZ", music_folder_path, True)
-    y = YoutubeLoader(music_folder_path, True)
+    s = SpotifyLoader("CZ", music_folder_path, False, True)
+    y = YoutubeLoader(music_folder_path, False, True)
     tracks_names = ["Jason Charles Miller Rules of Nature", "Morčata Na Útěku Outro", "Laura Branigan Self Control", "Dymytry Černí Andělé", "Imagine Dragons Enemy"]
     tracks = []
 
