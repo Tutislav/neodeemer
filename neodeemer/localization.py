@@ -9,7 +9,9 @@ CZ = {
     "Download completed": "Stahování dokončeno",
     "Downloaded ": "Staženo ",
     " songs": " skladeb",
+    " songs can't be downloaded": " skladeb se nepodařilo stáhnout",
     "Error while playing track": "Chyba při přehrávání skladby",
+    "Not available on YouTube": "Není na YouTube",
     #navigation_menu
     "Spotify search": "Vyhledávání na Spotify",
     "Saved songs will have tags": "Hudba se zařadí do alb",

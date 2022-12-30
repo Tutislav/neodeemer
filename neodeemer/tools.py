@@ -9,6 +9,7 @@ import unidecode
 
 
 class TrackStates(Enum):
+    UNAVAILABLE = -1
     UNKNOWN = 0
     SEARCHING = 1
     FOUND = 2

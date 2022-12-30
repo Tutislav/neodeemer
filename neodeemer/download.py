@@ -190,3 +190,5 @@ class Download():
                     self.download_mp3_vevioz()
         if self.track_dict["state"] == TrackStates.SAVED:
             self.save_tags()
+        if self.track_dict["state"] == TrackStates.UNAVAILABLE:
+            self.download_queue_info["position"] += 1

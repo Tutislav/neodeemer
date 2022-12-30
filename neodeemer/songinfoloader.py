@@ -150,7 +150,7 @@ class SpotifyLoader(Base):
             "track_size_added": False,
             "video_id": None,
             "forcedmp3": self.format_mp3,
-            "age_restricted": False,
+            "reason": "",
             "folder_path": folder_path,
             "file_path": file_path,
             "file_path2": file_path2,
@@ -265,7 +265,6 @@ class SpotifyLoader(Base):
         max_results = 5
         text = track_dict["artist_name"] + " " + track_dict["track_name"]
         video_id = None
-        age_restricted = False
         try:
             with YTMusic() as ytmusic:
                 tracks = ytmusic.search(text, "songs")
@@ -300,7 +299,7 @@ class SpotifyLoader(Base):
                                             video_id = track["videoId"]
         except:
             pass
-        while video_id == None:
+        while video_id == None and track_dict["state"] != TrackStates.UNAVAILABLE:
             try:
                 videos = YoutubeSearch(text, max_results=max_results).to_dict()
             except:
@@ -376,16 +375,11 @@ class SpotifyLoader(Base):
                 if len(suitable_videos) > 0:
                     video_id = suitable_videos[0][0]["id"]
                 else:
-                    video_id = videos[0]["id"]
-                    video_details = videos[0]["video_details"]
-                    if "contentRating" in video_details:
-                        content_rating = video_details["contentRating"]
-                        if "ytRating" in content_rating:
-                            if content_rating["ytRating"] == "ytAgeRestricted":
-                                age_restricted = True
-        track_dict["video_id"] = video_id
-        track_dict["age_restricted"] = age_restricted
-        track_dict["state"] = TrackStates.FOUND
+                    track_dict["reason"] = "Not available on YouTube"
+                    track_dict["state"] = TrackStates.UNAVAILABLE
+        if video_id != None:
+            track_dict["video_id"] = video_id
+            track_dict["state"] = TrackStates.FOUND
 
 class YoutubeLoader(Base):
     def track_to_dict(self, track, playlist=False):
@@ -416,7 +410,7 @@ class YoutubeLoader(Base):
             "track_size_added": False,
             "video_id": video_id,
             "forcedmp3": self.format_mp3,
-            "age_restricted": False,
+            "reason": "",
             "folder_path": self.music_folder_path,
             "file_path": file_path,
             "file_path2": file_path,

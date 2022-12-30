@@ -97,6 +97,9 @@ class YPlaylistScreen(Screen):
 class SettingsScreen(Screen):
     pass
 
+class ErrorScreen(Screen):
+    pass
+
 class Neodeemer(MDApp):
     icon = "data/icon.png"
     loc = Localization()
@@ -110,6 +113,7 @@ class Neodeemer(MDApp):
         "total_b": 0
     }
     playlist_queue = []
+    unavailable_tracks = []
     sound = None
     playlist_last = {
         "spotify": {},
@@ -205,6 +209,15 @@ class Neodeemer(MDApp):
                         } for lang in self.loc.LANGUAGES.keys()
                     ]
                     self.localization_menu = MDDropdownMenu(caller=self.text_localization, items=self.localization_menu_list, position="auto", width_mult=2)
+            elif screen_name == "ErrorScreen":
+                mdlist_tracks = screen.ids.mdlist_tracks
+                mdlist_tracks.clear_widgets()
+                for track in self.unavailable_tracks:
+                    track_name = track["track_name"] + " - [b]" + track["artist_name"] + "[/b]"
+                    secondary_text = self.loc.get(track["reason"])
+                    line = ListLineTrack(text=track_name, secondary_text=secondary_text)
+                    line.add_widget(IconLeftWidget(icon="alert"))
+                    mdlist_tracks.add_widget(line)
         self.screen_manager.direction = direction
         self.screen_manager.current = screen_name
         self.screen_cur = self.screen_manager.current_screen
@@ -430,7 +443,7 @@ class Neodeemer(MDApp):
                 sleep(randint(0, 20) / 100)
                 if not track["locked"]:
                     track["locked"] = True
-                    if any(state == track["state"] for state in [TrackStates.UNKNOWN, TrackStates.FOUND, TrackStates.SAVED]):
+                    if any(state == track["state"] for state in [TrackStates.UNAVAILABLE, TrackStates.UNKNOWN, TrackStates.FOUND, TrackStates.SAVED]):
                         Download(track, self.s, self.download_queue_info).download_track()
                     track["locked"] = False
                 else:
@@ -456,7 +469,7 @@ class Neodeemer(MDApp):
                     track_dict_temp["file_path2"] = os.path.join(self.user_data_dir, "temp.mp3")
                     if "playlist_name" in track_dict_temp:
                         del track_dict_temp["playlist_name"]
-                    if track_file_state(track_dict_temp) != TrackStates.COMPLETED:
+                    if track_dict_temp["state"] != TrackStates.COMPLETED:
                         if platform == "android":
                             if track_dict_temp["state"] == TrackStates.UNKNOWN and track_dict_temp["video_id"] == None:
                                 self.s.track_find_video_id(track_dict_temp)
@@ -469,8 +482,7 @@ class Neodeemer(MDApp):
                             }
                             Download(track_dict_temp, self.s, download_queue_info_temp, False).download_track()
                         track_dict["video_id"] = track_dict_temp["video_id"]
-                        track_dict["age_restricted"] = track_dict_temp["age_restricted"]
-                        track_dict["state"] = TrackStates.FOUND
+                        track_dict["state"] = track_dict_temp["state"]
                 if self.sound != None:
                     self.sound.stop()
                     self.sound_prev_widget.children[0].icon = "play-circle-outline"
@@ -478,11 +490,14 @@ class Neodeemer(MDApp):
                     file_path = track_dict_temp["file_path2"]
                 else:
                     file_path = track_dict_temp["file_path"]
-                if track_file_state(track_dict_temp) == TrackStates.COMPLETED:
+                if track_dict_temp["state"] == TrackStates.COMPLETED:
                     self.sound = SoundLoader.load(file_path)
                     self.sound.play()
                     widget.children[0].icon = "stop-circle"
                     self.sound_prev_widget = widget
+                elif track_dict_temp["state"] == TrackStates.UNAVAILABLE:
+                    widget.children[0].icon = "alert"
+                    Clock.schedule_once(partial(self.snackbar_show, self.loc.get("Error while playing track")))
             elif self.sound != None:
                 self.sound.stop()
                 widget.children[0].icon = "play-circle-outline"
@@ -497,17 +512,26 @@ class Neodeemer(MDApp):
             Clock.schedule_once(self.progressbar_update)
             sleep(0.5)
         self.progressbar_update()
-        tracks_count = len(self.download_queue)
+        for track in self.download_queue:
+            if track["state"] == TrackStates.UNAVAILABLE:
+                self.unavailable_tracks.append(track)
+        tracks_count = len(self.download_queue) - len(self.unavailable_tracks)
         self.download_queue = []
         self.download_queue_info["position"] = 0
         self.download_queue_info["downloaded_b"] = 0
         self.download_queue_info["total_b"] = 0
         self.playlist_queue = []
+        message = self.loc.get("Downloaded ") + str(tracks_count) + self.loc.get(" songs")
+        if len(self.unavailable_tracks) > 0:
+            message += "\n" + str(len(self.unavailable_tracks)) + self.loc.get(" songs can't be downloaded")
+            Clock.schedule_once(partial(self.snackbar_show, str(len(self.unavailable_tracks)) + self.loc.get(" songs can't be downloaded")))
+            left_action_items = [["alert", lambda x:self.screen_switch("ErrorScreen")]]
+            self.toolbar.left_action_items = left_action_items
         if platform == "win":
             icon_path = resource_find("data/icon.ico")
         else:
             icon_path = resource_find("data/icon.png")
-        notification.notify(title=self.loc.get("Download completed"), message=self.loc.get("Downloaded ") + str(tracks_count) + self.loc.get(" songs"), app_name=self.loc.TITLE, app_icon=icon_path)
+        notification.notify(title=self.loc.get("Download completed"), message=message, app_name=self.loc.TITLE, app_icon=icon_path)
     
     def progressbar_update(self, *args):
         if self.download_queue_info["total_b"] > 0:
