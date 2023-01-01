@@ -109,11 +109,16 @@ def contains_separate_word(text, word, max_position=None):
     contains = False
     if word in text:
         word_position = text.find(word)
-        if word_position > 0:
-            if text[word_position - 1] == " ":
+        word_char_start = word_position - 1
+        word_char_end = word_position + len(word)
+        if word_position == 0:
+            if text[word_char_end] == " ":
                 contains = True
-        if word_position + len(word) < len(text):
-            if text[word_position + len(word)] == " ":
+        elif word_position == len(text) - len(word):
+            if text[word_char_start] == " ":
+                contains = True
+        else:
+            if text[word_char_start] == " " and text[word_char_end] == " ":
                 contains = True
     if max_position != None:
         if word_position > max_position:
@@ -174,10 +179,10 @@ def contains_date(text, compare_text=None):
                 date_end_position = i
             if date_end_position - date_start_position > 10:
                 date_start_position = date_end_position
-        elif all(char != c for c in ["/", ".", "-", " "]) and date_end_position - date_start_position > 3:
+        elif all(char != c for c in ["/", ".", "-", " "]) and date_end_position - date_start_position > 2:
             dates.append(text[date_start_position:date_end_position + 1])
             date_start_position = date_end_position
-        if date_end_position == (len(text) - 1) and date_end_position - date_start_position > 3:
+        if date_end_position == (len(text) - 1) and date_end_position - date_start_position > 2:
             dates.append(text[date_start_position:date_end_position + 1])
     if len(dates) > 0:
         for date in dates:
