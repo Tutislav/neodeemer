@@ -468,6 +468,8 @@ class Neodeemer(MDApp):
                 if stream:
                     if track_dict_temp["state"] == TrackStates.UNKNOWN and track_dict_temp["video_id"] == None:
                         self.s.track_find_video_id(track_dict_temp)
+                        track_dict["video_id"] = track_dict_temp["video_id"]
+                        track_dict["state"] = track_dict_temp["state"]
                     file_path = "https://neodeemer.vorpal.tk/mp3.php?video_id=" + track_dict_temp["video_id"] + ".mp3"
                     try:
                         self.sound = SoundLoader.load(file_path)
