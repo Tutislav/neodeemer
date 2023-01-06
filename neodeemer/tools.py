@@ -112,10 +112,10 @@ def contains_separate_word(text, word, max_position=None):
         word_char_start = word_position - 1
         word_char_end = word_position + len(word)
         if word_position == 0:
-            if text[word_char_end] == " ":
+            if word_char_end < len(text) and text[word_char_end] == " ":
                 contains = True
         elif word_position == len(text) - len(word):
-            if text[word_char_start] == " ":
+            if word_char_start >= 0 and text[word_char_start] == " ":
                 contains = True
         else:
             if text[word_char_start] == " " and text[word_char_end] == " ":

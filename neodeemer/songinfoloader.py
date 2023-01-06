@@ -255,6 +255,7 @@ class SpotifyLoader(Base):
     
     def track_find_video_id(self, track_dict):
         track_dict["state"] = TrackStates.SEARCHING
+        options = self.ytsfilter["options"]
         preferred_channels = self.ytsfilter["preferred_channels"]
         excluded_channels = self.ytsfilter["excluded_channels"]
         excluded_words = self.ytsfilter["excluded_words"]
@@ -326,47 +327,39 @@ class SpotifyLoader(Base):
                 video["video_title"] = video_title
                 video["video_description"] = ""
                 video["video_details"] = ""
-                if video_views > 300 and video_duration_s >= (track_duration_s - 150) and video_duration_s <= (track_duration_s + 150):
+                if video_views > options["min_video_views"] and video_duration_s >= (track_duration_s - options["video_duration_tolerance_s"]) and video_duration_s <= (track_duration_s + options["video_duration_tolerance_s"]):
                     self.video_get_details(video)
                     video_description = video["video_description"]
                     video_details = video["video_details"]
-                    if "contentRating" in video_details:
-                        content_rating = video_details["contentRating"]
-                        if "ytRating" in content_rating:
-                            if content_rating["ytRating"] == "ytAgeRestricted":
-                                continue
                     if contains_artist_track(video_title, artist_name2, track_name2) or contains_artist_track(video_channel, artist_name2) or contains_artist_track(video_description, artist_name2):
                         if contains_artist_track(video_title, track_name=track_name2):
+                            priority = 5
                             if track_name2 == artist_name2:
                                 if not video_title.count(artist_name2) == 2:
-                                    continue
+                                    priority += options["not_same_name_penalization"]
                             if contains_date(video["title"], track_name2):
-                                continue
+                                priority += options["contains_date_penalization"]
                             if any(word in video_channel for word in excluded_channels):
                                 continue
-                            contains_excluded = False
                             for word in excluded_words:
                                 if word in video_title and not word in track_name2:
                                     if contains_separate_word(video_title, word):
-                                        contains_excluded = True
+                                        priority += options["contains_word_title_penalization"]
                                         break
                                 if word in video_description:
                                     if contains_separate_word(video_description, word, 100):
-                                        contains_excluded = True
+                                        priority += options["contains_word_description_penalization"]
                                         break
-                            if contains_excluded:
-                                continue
                             if "provided to youtube" in video["video_description"] or "taken from the album" in video["video_description"]:
-                                priority = 0
+                                priority += options["youtube_music_priority"]
                             elif artist_name2 in video["video_channel"] or any(word in video["video_channel"] for word in preferred_channels):
-                                priority = 1
+                                priority += options["prefered_channel_priority"]
                             elif artist_name2 in video["video_title"]:
-                                priority = 2
-                            else:
-                                priority = 3
-                            suitable_videos.append([video, priority])
+                                priority += options["artist_in_title_priority"]
+                            if priority > 0:
+                                suitable_videos.append([video, priority])
             if len(suitable_videos) > 0:
-                suitable_videos = sorted(suitable_videos, key=lambda x:x[1])
+                suitable_videos = sorted(suitable_videos, key=lambda x:x[1], reverse=True)
                 video_id = suitable_videos[0][0]["id"]
             if video_id == None:
                 if max_results < 10:

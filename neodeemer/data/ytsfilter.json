@@ -1,5 +1,16 @@
 {
+    "options": {
+        "min_video_views": 300,
+        "video_duration_tolerance_s": 150,
+        "not_same_name_penalization": -10,
+        "contains_date_penalization": -5,
+        "contains_word_title_penalization": -10,
+        "contains_word_description_penalization": -5,
+        "youtube_music_priority": 15,
+        "prefered_channel_priority": 10,
+        "artist_in_title_priority": 5
+    },
     "preferred_channels": ["rhino", "vevo", "warner", "watertower", "bandzonecz", "afm records"],
     "excluded_channels": ["songs_cz", "cumizgum", "forever runandplay", "travelguy"],
-    "excluded_words": ["fest", "tour", "filmed", "live", "cover", "remix", "full album", "trailer", "news", "arena", "koncert", "koncertu", "konzertu", "zaznam koncertu", "zivak", "festival", "cele album"]
+    "excluded_words": ["fest", "tour", "filmed", "live", "cover", "remix", "drum version", "full album", "trailer", "news", "arena", "koncert", "koncertu", "konzertu", "zaznam koncertu", "zivak", "festival", "cele album"]
 }
