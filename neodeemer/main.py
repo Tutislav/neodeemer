@@ -443,7 +443,7 @@ class Neodeemer(MDApp):
                 sleep(randint(0, 20) / 100)
                 if not track["locked"]:
                     track["locked"] = True
-                    if any(state == track["state"] for state in [TrackStates.UNAVAILABLE, TrackStates.UNKNOWN, TrackStates.FOUND, TrackStates.SAVED]):
+                    if any(state == track["state"] for state in [TrackStates.UNKNOWN, TrackStates.FOUND, TrackStates.SAVED]):
                         Download(track, self.s, self.download_queue_info).download_track()
                     track["locked"] = False
                 else:

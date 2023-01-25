@@ -45,6 +45,15 @@ class Download():
             except OSError:
                 pass
 
+    def delete_broken_files(self):
+        try:
+            if os.path.exists(self.track_dict["file_path"]):
+                os.remove(self.track_dict["file_path"])
+            elif os.path.exists(self.track_dict["file_path2"]):
+                os.remove(self.track_dict["file_path2"])
+        except:
+            pass
+
     def playlist_file_save(self):
         if "playlist_name" in self.track_dict:
             if self.track_dict["forcedmp3"]:
@@ -115,10 +124,6 @@ class Download():
             if video_info["ext"] != "m4a":
                 self.track_dict["forcedmp3"] = True
             self.track_dict["state"] = TrackStates.DOWNLOADING
-            if os.path.exists(self.track_dict["file_path"]):
-                os.remove(self.track_dict["file_path"])
-            elif os.path.exists(self.track_dict["file_path2"]):
-                os.remove(self.track_dict["file_path2"])
             ydl.download([video_url])
             self.track_dict["state"] = TrackStates.SAVED
     
@@ -177,17 +182,27 @@ class Download():
         if self.track_dict["state"] == TrackStates.FOUND:
             if not self.track_dict["forcedmp3"]:
                 try:
+                    self.delete_broken_files()
                     self.download_m4a_youtube_dl()
                 except:
                     try:
+                        self.delete_broken_files()
                         self.download_m4a_pytube()
                     except:
+                        self.delete_broken_files()
                         self.track_dict["forcedmp3"] = True
             else:
                 try:
+                    self.delete_broken_files()
                     self.download_mp3_neodeemer()
                 except:
-                    self.download_mp3_vevioz()
+                    try:
+                        self.delete_broken_files()
+                        self.download_mp3_vevioz()
+                    except:
+                        self.delete_broken_files()
+                        self.track_dict["state"] = TrackStates.UNAVAILABLE
+                        self.track_dict["reason"] = "Error while downloading"
         if self.track_dict["state"] == TrackStates.SAVED:
             self.save_tags()
         if self.track_dict["state"] == TrackStates.UNAVAILABLE:
