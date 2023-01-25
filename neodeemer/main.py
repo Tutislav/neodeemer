@@ -465,13 +465,13 @@ class Neodeemer(MDApp):
                 if self.sound != None:
                     self.sound.stop()
                     self.sound_prev_widget.children[0].icon = "play-circle-outline"
-                if stream:
-                    if track_dict_temp["state"] == TrackStates.UNKNOWN and track_dict_temp["video_id"] == None:
-                        self.s.track_find_video_id(track_dict_temp)
-                        track_dict["video_id"] = track_dict_temp["video_id"]
-                        track_dict["state"] = track_dict_temp["state"]
-                    file_path = "https://neodeemer.vorpal.tk/mp3.php?video_id=" + track_dict_temp["video_id"] + ".mp3"
+                if stream and track_dict_temp["state"] != TrackStates.COMPLETED:
                     try:
+                        if track_dict_temp["state"] == TrackStates.UNKNOWN and track_dict_temp["video_id"] == None:
+                            self.s.track_find_video_id(track_dict_temp)
+                            track_dict["video_id"] = track_dict_temp["video_id"]
+                            track_dict["state"] = track_dict_temp["state"]
+                        file_path = "https://neodeemer.vorpal.tk/mp3.php?video_id=" + track_dict_temp["video_id"] + ".mp3"
                         self.sound = SoundLoader.load(file_path)
                         self.sound.play()
                         widget.children[0].icon = "stop-circle"

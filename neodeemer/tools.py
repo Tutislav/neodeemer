@@ -66,6 +66,7 @@ def track_file_state(track_dict):
     file_path = None
     if os.path.exists(track_dict["file_path"]) and os.path.getsize(track_dict["file_path"]) > 0:
         file_path = track_dict["file_path"]
+        track_dict["forcedmp3"] = False
     elif os.path.exists(track_dict["file_path2"]) and os.path.getsize(track_dict["file_path2"]) > 0:
         file_path = track_dict["file_path2"]
         track_dict["forcedmp3"] = True
