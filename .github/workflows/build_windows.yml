@@ -30,7 +30,7 @@ jobs:
       - name: Download dependencies
         shell: cmd
         run: |
-          python -m pip install pyinstaller
+          python -m pip install pyinstaller==5.3
           python -m pip install -r neodeemer/requirements.txt
           curl -L https://downloads.fdossena.com/geth.php?r=mesa64-latest --output mesa.7z
           7z e mesa.7z opengl32.dll -o"neodeemer"
