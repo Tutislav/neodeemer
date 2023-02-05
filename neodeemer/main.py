@@ -37,7 +37,7 @@ from download import Download
 from localization import Localization
 from songinfoloader import SpotifyLoader, YoutubeLoader
 from tools import (TrackStates, check_update_available, open_url, submit_bugs,
-                   track_file_state)
+                   check_mp3_available)
 
 __version__ = "0.4"
 
@@ -471,6 +471,8 @@ class Neodeemer(MDApp):
                             self.s.track_find_video_id(track_dict_temp)
                             track_dict["video_id"] = track_dict_temp["video_id"]
                             track_dict["state"] = track_dict_temp["state"]
+                        if not check_mp3_available(track_dict):
+                            raise
                         file_path = "https://neodeemer.vorpal.tk/mp3.php?video_id=" + track_dict_temp["video_id"] + ".mp3"
                         self.sound = SoundLoader.load(file_path)
                         self.sound.play()

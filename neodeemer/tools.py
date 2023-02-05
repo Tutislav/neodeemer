@@ -253,3 +253,8 @@ def check_update_available(current_version):
     data = urldata.json()
     new_version = data[0]["tag_name"]
     return new_version != current_version
+
+def check_mp3_available(track_dict):
+    url = "https://neodeemer.vorpal.tk/mp3.php?video_id=" + track_dict["video_id"] + "&info=1"
+    urldata = requests.get(url)
+    return bool(int(urldata.text))
