@@ -190,6 +190,7 @@ class Download():
                         self.download_m4a_pytube()
                     except:
                         self.delete_broken_files()
+                        self.track_dict["state"] = TrackStates.FOUND
                         self.track_dict["forcedmp3"] = True
             else:
                 try:
