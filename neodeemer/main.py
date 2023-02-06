@@ -667,9 +667,11 @@ class Neodeemer(MDApp):
         if show:
             tracks_actions.opacity = 1
             tracks_actions.height = 40
+            tracks_actions.pos_hint = {"center_x": .5}
         else:
             tracks_actions.opacity = 0
             tracks_actions.height = 0
+            tracks_actions.pos_hint = {"center_x": -1}
     
     def playlist_last_menu_show(self, youtube=False):
         if youtube:
