@@ -103,6 +103,8 @@ class Download():
     def download_file(self, url, file_path):
         with open(file_path, "wb") as file:
             response = requests.get(url, headers=HEADERS, stream=True)
+            if response.status_code != 200:
+                raise
             self.total_b_add(len(response.content))
             for data in response.iter_content(4096):
                 file.write(data)
@@ -156,21 +158,26 @@ class Download():
                 return self.list
         url = "https://api.vevioz.com/@api/button/mp3/" + self.track_dict["video_id"]
         found_mp3_url = False
+        response = requests.get(url, headers=HEADERS)
+        if response.status_code != 200:
+            raise
         while not found_mp3_url:
             try:
-                with request.urlopen(request.Request(url, headers=HEADERS)) as urldata:
-                    mp3urlparser = Mp3UrlParser()
-                    mp3urlparser.feed(urldata.read().decode())
-                    parser_attempt = 0
-                    while len(mp3urlparser.to_list()) == 0:
-                        parser_attempt += 1
-                        if parser_attempt >= 5:
-                            raise
-                        sleep(0.5)
-                    found_mp3_url = True
-                    mp3_url = mp3urlparser.to_list()[2]
+                mp3urlparser = Mp3UrlParser()
+                mp3urlparser.feed(response.text)
+                parser_attempt = 0
+                while len(mp3urlparser.to_list()) == 0:
+                    parser_attempt += 1
+                    if parser_attempt >= 5:
+                        raise
+                    sleep(0.5)
+                found_mp3_url = True
+                mp3_url = mp3urlparser.to_list()[2]
             except:
                 sleep(2)
+                response = requests.get(url, headers=HEADERS)
+                if response.status_code != 200:
+                    raise
         self.track_dict["state"] = TrackStates.DOWNLOADING
         self.download_file(mp3_url, self.track_dict["file_path2"])
         self.track_dict["state"] = TrackStates.SAVED
@@ -190,8 +197,12 @@ class Download():
                         self.download_m4a_pytube()
                     except:
                         self.delete_broken_files()
-                        self.track_dict["state"] = TrackStates.FOUND
-                        self.track_dict["forcedmp3"] = True
+                        if not self.spotifyloader.format_mp3:
+                            self.track_dict["state"] = TrackStates.FOUND
+                            self.track_dict["forcedmp3"] = True
+                        else:
+                            self.track_dict["state"] = TrackStates.UNAVAILABLE
+                            self.track_dict["reason"] = "Error while downloading"
             else:
                 try:
                     self.delete_broken_files()
@@ -202,8 +213,12 @@ class Download():
                         self.download_mp3_vevioz()
                     except:
                         self.delete_broken_files()
-                        self.track_dict["state"] = TrackStates.UNAVAILABLE
-                        self.track_dict["reason"] = "Error while downloading"
+                        if self.spotifyloader.format_mp3:
+                            self.track_dict["state"] = TrackStates.FOUND
+                            self.track_dict["forcedmp3"] = False
+                        else:
+                            self.track_dict["state"] = TrackStates.UNAVAILABLE
+                            self.track_dict["reason"] = "Error while downloading"
         if self.track_dict["state"] == TrackStates.SAVED:
             self.save_tags()
         if self.track_dict["state"] == TrackStates.UNAVAILABLE:
