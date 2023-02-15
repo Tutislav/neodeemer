@@ -612,9 +612,15 @@ class Neodeemer(MDApp):
         self.toolbar.left_action_items = left_action_items
     
     def mdlist_add_page_controls(self, mdlist):
+        if self.screen_cur.name == "SpotifyScreen":
+            view_cur = self.tab_cur
+        else:
+            view_cur = self.screen_cur
         line = OneLineAvatarIconListItem()
-        line.add_widget(IconLeftWidget(icon="arrow-left-bold", on_press=lambda x:self.tracks_change_page(False)))
-        line.add_widget(IconRightWidget(icon="arrow-right-bold", on_press=lambda x:self.tracks_change_page()))
+        if view_cur.page > 1:
+            line.add_widget(IconLeftWidget(icon="arrow-left-bold", on_press=lambda x:self.tracks_change_page(False)))
+        if view_cur.page < 10:
+            line.add_widget(IconRightWidget(icon="arrow-right-bold", on_press=lambda x:self.tracks_change_page()))
         mdlist.add_widget(line)
     
     def tracks_change_page(self, next=True):
