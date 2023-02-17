@@ -378,7 +378,10 @@ class YoutubeLoader(Base):
     def track_to_dict(self, track, playlist=False):
         if not playlist:
             track_name = track["title"]
-            track_duration_str = track["duration"]
+            if type(track["duration"]) is str:
+                track_duration_str = track["duration"]
+            else:
+                track_duration_str = mstostr(track["duration"] * 1000)
             video_id = track["id"]
             video_channel = track["channel"]
         else:

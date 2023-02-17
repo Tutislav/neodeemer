@@ -71,28 +71,23 @@ class SpotifyScreen(Screen):
 
 class ArtistsTab(MDBoxLayout, MDTabsBase):
     tab_name = "ArtistsTab"
-    pass
 
 class AlbumsTab(MDBoxLayout, MDTabsBase):
     tab_name = "AlbumsTab"
     page = 1
-    pass
 
 class TracksTab(MDBoxLayout, MDTabsBase):
     tab_name = "TracksTab"
     page = 1
-    pass
 
 class YouTubeScreen(Screen):
     pass
 
 class SPlaylistScreen(Screen):
     page = 1
-    pass
 
 class YPlaylistScreen(Screen):
     page = 1
-    pass
 
 class SettingsScreen(Screen):
     pass
@@ -243,6 +238,7 @@ class Neodeemer(MDApp):
         if len(artists) > 0:
             return True
         else:
+            Clock.schedule_once(partial(self.snackbar_show, self.loc.get("Error while loading artists")))
             return False
     
     def artists_show(self, *args):
@@ -272,6 +268,7 @@ class Neodeemer(MDApp):
         if len(albums) > 0:
             return True
         else:
+            Clock.schedule_once(partial(self.snackbar_show, self.loc.get("Error while loading albums")))
             return False
     
     def albums_show(self, *args):
@@ -308,6 +305,7 @@ class Neodeemer(MDApp):
         if len(tracks) > 0:
             return True
         else:
+            Clock.schedule_once(partial(self.snackbar_show, self.loc.get("Error while loading tracks")))
             return False
     
     def tracks_show(self, *args):
@@ -344,6 +342,7 @@ class Neodeemer(MDApp):
         if len(tracks) > 0:
             return True
         else:
+            Clock.schedule_once(partial(self.snackbar_show, self.loc.get("Error while loading tracks")))
             return False
     
     def playlist_load(self, youtube=False):
@@ -369,6 +368,7 @@ class Neodeemer(MDApp):
             label_playlist_info.text = "[b]" + tracks[0]["playlist_name"] + "[/b] - [b]" + str(len(tracks)) + "[/b]" + self.loc.get(" songs")
             return True
         else:
+            Clock.schedule_once(partial(self.snackbar_show, self.loc.get("Error while loading playlist")))
             return False
     
     def playlist_show(self, page=0, youtube=False, *args):
@@ -802,11 +802,11 @@ if __name__ == "__main__":
     if not os.path.exists(settings_folder_path):
         try:
             os.makedirs(settings_folder_path)
-        except OSError:
-            pass
+        except Exception as e:
+            print(str(e))
     app.settings_file_path = os.path.join(settings_folder_path, "settings.json")
     try:
         app.settings_load()
-    except OSError:
-        pass
+    except Exception as e:
+        print(str(e))
     app.run()
