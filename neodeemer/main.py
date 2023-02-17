@@ -802,11 +802,11 @@ if __name__ == "__main__":
     if not os.path.exists(settings_folder_path):
         try:
             os.makedirs(settings_folder_path)
-        except Exception as e:
-            print(str(e))
+        except OSError:
+            pass
     app.settings_file_path = os.path.join(settings_folder_path, "settings.json")
     try:
         app.settings_load()
-    except Exception as e:
-        print(str(e))
+    except OSError:
+        pass
     app.run()

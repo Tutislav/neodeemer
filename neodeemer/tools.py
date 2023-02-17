@@ -82,7 +82,7 @@ def track_file_state(track_dict):
             else:
                 state = TrackStates.SAVED
         except:
-            state = TrackStates.SAVED
+            state = TrackStates.UNKNOWN
     return state
 
 def submit_bug(track_dict):
