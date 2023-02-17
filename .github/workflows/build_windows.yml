@@ -14,7 +14,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v3.0.2
+        uses: actions/checkout@v3.3.0
 
       - name: Create .env file
         shell: cmd
@@ -35,6 +35,22 @@ jobs:
           curl -L https://downloads.fdossena.com/geth.php?r=mesa64-latest --output mesa.7z
           7z e mesa.7z opengl32.dll -o"neodeemer"
 
+      - name: Remove unnecessary files
+        shell: cmd
+        run: |
+          python -m pip uninstall -y pycryptodomex
+          for /f "delims=" %%i in ('python -c "import sysconfig; print(sysconfig.get_path('purelib'))"') do cd /D "%%i"
+          cd yt_dlp\extractor\
+          mkdir ..\temp\
+          move __init__.py ..\temp\ && move _extractors.py ..\temp\ && move adobepass.py ..\temp\ && move common.py ..\temp\ && move commonmistakes.py ..\temp\ && move commonprotocols.py ..\temp\ && move extractors.py ..\temp\ && move generic.py ..\temp\ && move lazy_extractors.py ..\temp\ && move openload.py ..\temp\ && move youtube.py ..\temp\
+          del /S /Q *
+          cd ..\temp\
+          powershell -c "gc _extractors.py | select -first 26" > _extractors.py
+          echo from .commonmistakes import CommonMistakesIE, UnicodeBOMIE >> _extractors.py
+          echo from .commonprotocols import MmsIE, RtmpIE, ViewSourceIE >> _extractors.py
+          echo from .generic import GenericIE >> _extractors.py
+          move __init__.py ..\extractor\ && move _extractors.py ..\extractor\ && move adobepass.py ..\extractor\ && move common.py ..\extractor\ && move commonmistakes.py ..\extractor\ && move commonprotocols.py ..\extractor\ && move extractors.py ..\extractor\ && move generic.py ..\extractor\ && move lazy_extractors.py ..\extractor\ && move openload.py ..\extractor\ && move youtube.py ..\extractor\
+
       - name: Build with PyInstaller
         shell: cmd
         run: |
@@ -43,6 +59,6 @@ jobs:
           python -m PyInstaller neodeemer.spec
 
       - name: Upload a Build Artifact
-        uses: actions/upload-artifact@v3.1.0
+        uses: actions/upload-artifact@v3.1.2
         with:
           path: neodeemer/dist
