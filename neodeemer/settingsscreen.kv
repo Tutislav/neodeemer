@@ -74,6 +74,8 @@
             MDTextField:
                 id: text_localization
                 hint_text: app.loc.get("Language")
-                on_focus: if self.focus: app.localization_menu.open()
+                on_focus:
+                    if self.focus: app.localization_menu.open()
+                    if self.focus: Window.release_all_keyboards()
                 
             MDBoxLayout:
