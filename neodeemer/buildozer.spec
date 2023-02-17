@@ -21,7 +21,7 @@ version.filename = %(source.dir)s/main.py
 
 # (list) Application requirements
 # comma separated e.g. requirements = sqlite3,kivy
-requirements = python3,async-timeout==4.0.2,certifi==2022.5.18.1,charset-normalizer==2.1.1,Deprecated==1.2.13,docutils==0.19,ffpyplayer,ffpyplayer_codecs,idna==3.3,Kivy==2.1.0,kivymd==1.0.2,music-tag==0.4.3,mutagen==1.45.1,packaging==21.3,Pillow,plyer==2.1.0,Pygments==2.13.0,pyparsing==3.0.9,python-dotenv==0.20.0,pytube,redis==4.3.4,requests==2.28.1,six==1.16.0,spotipy==2.20.0,Unidecode==1.3.4,urllib3==1.26.12,wrapt==1.14.1,youtube-search==2.1.1,yt-dlp,ytmusicapi==0.22.0
+requirements = python3,async-timeout==4.0.2,Brotli==1.0.9,certifi==2022.12.7,charset-normalizer==2.1.1,docutils==0.19,ffpyplayer,ffpyplayer_codecs,idna==3.4,Kivy==2.1.0,kivymd==1.1.1,music-tag==0.4.3,mutagen==1.46.0,Pillow,plyer==2.1.0,Pygments==2.14.0,python-dotenv==0.21.1,pytube,redis==4.5.1,requests==2.28.2,six==1.16.0,spotipy==2.22.1,Unidecode==1.3.6,urllib3==1.26.14,websockets==10.4,youtube-search==2.1.2,yt-dlp,ytmusicapi==0.25.0
 
 # (str) Presplash of the application
 presplash.filename = %(source.dir)s/data/presplash.png
