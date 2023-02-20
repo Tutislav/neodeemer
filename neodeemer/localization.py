@@ -48,6 +48,9 @@ CZ = {
     "Show": "Zobrazit",
     #SettingsScreen
     "Format": "Formát",
+    "Download lyrics": "Stahovat texty",
+    "Unsynchronized lyrics": "Nesynchronizované texty",
+    "Synchronized lyrics": "Synchronizované texty",
     "Create subfolders": "Vytvářet podsložky",
     "Music folder": "Složka, do které se ukládá hudba",
     "Choose folder": "Vybrat složku",
@@ -67,7 +70,7 @@ class Localization():
     }
 
     def __init__(self):
-        self.lang = "en-US"
+        self.lang = "en_US"
         if platform == "android":
             from jnius import autoclass
             javalocale = autoclass("java.util.Locale")

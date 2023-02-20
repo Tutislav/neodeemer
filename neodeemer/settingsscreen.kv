@@ -16,66 +16,109 @@
                 id: progressbar
                 color: app.theme_cls.accent_dark
 
-        MDGridLayout:
-            rows: 9
-            size_hint: 1, 0.1
-            spacing: [15, 30]
-            padding: 15
-            
-            MDGridLayout:
-                cols: 4
-                spacing: 15
-
-                MDLabel:
-                    text: app.loc.get("Format")
-
-                MDLabel:
-                    text: app.loc.get("M4A")
-                    halign: "right"
-                
-                MDSwitch:
-                    id: switch_format
-                    active: app.format_mp3
-                    width: dp(64)
-                    on_active: app.format_change()
-                
-                MDLabel:
-                    text: app.loc.get("MP3")
-            
-            MDGridLayout:
-                cols: 2
-
-                MDLabel:
-                    text: app.loc.get("Create subfolders")
-                
-                MDCheckbox:
-                    id: check_create_subfolders
-                    on_press: app.create_subfolders_change()
-                    active: app.create_subfolders
-                    color_active: app.theme_cls.accent_color
-                    color_inactive: app.theme_cls.accent_color
-
-            MDTextField:
-                id: text_music_folder_path
-                hint_text: app.loc.get("Music folder")
-                on_text_validate: app.music_folder_path_change()
-            
-            MDFillRoundFlatIconButton:
-                text: app.loc.get("Choose folder")
-                icon: "folder"
-                on_press: app.file_manager.show(app.file_manager_default_path)
-            
-            
-            MDFillRoundFlatIconButton:
-                text: app.loc.get("Toggle theme")
-                icon: "theme-light-dark"
-                on_press: app.theme_toggle()
-            
-            MDTextField:
-                id: text_localization
-                hint_text: app.loc.get("Language")
-                on_focus:
-                    if self.focus: app.localization_menu.open()
-                    if self.focus: Window.release_all_keyboards()
-                
+        ScrollView:
             MDBoxLayout:
+                orientation: "vertical"
+                adaptive_height: True
+                spacing: 30
+                padding: 15
+
+                MDGridLayout:
+                    cols: 4
+                    adaptive_height: True
+                    spacing: 15
+
+                    MDLabel:
+                        text: app.loc.get("Format")
+
+                    MDLabel:
+                        text: app.loc.get("M4A")
+                        halign: "right"
+
+                    MDSwitch:
+                        id: switch_format
+                        active: app.format_mp3
+                        width: dp(64)
+                        on_active: app.format_change()
+
+                    MDLabel:
+                        text: app.loc.get("MP3")
+
+                MDGridLayout:
+                    cols: 4
+                    adaptive_height: True
+                    spacing: 15
+
+                    MDLabel:
+                        text: app.loc.get("Create subfolders")
+
+                    MDBoxLayout:
+
+                    MDSwitch:
+                        id: switch_create_subfolders
+                        active: app.create_subfolders
+                        width: dp(64)
+                        on_active: app.create_subfolders_change()
+                    
+                    MDBoxLayout:
+
+                MDTextField:
+                    id: text_music_folder_path
+                    hint_text: app.loc.get("Music folder")
+                    on_text_validate: app.music_folder_path_change()
+
+                MDFillRoundFlatIconButton:
+                    text: app.loc.get("Choose folder")
+                    icon: "folder"
+                    on_press: app.file_manager.show(app.file_manager_default_path)
+
+                MDGridLayout:
+                    cols: 4
+                    adaptive_height: True
+                    spacing: 15
+    
+                    MDLabel:
+                        text: app.loc.get("Download lyrics")
+                    
+                    MDBoxLayout:
+                    
+                    MDSwitch:
+                        id: switch_save_lyrics
+                        active: app.save_lyrics
+                        width: dp(64)
+                        on_active: app.save_lyrics_change()
+
+                    MDBoxLayout:
+                
+                MDGridLayout:
+                    id: options_lyrics
+                    cols: 3
+                    adaptive_height: True
+                    height: int(app.save_lyrics) * 40
+                    spacing: 15
+                    opacity: int(app.save_lyrics)
+    
+                    MDLabel:
+                        text: app.loc.get("Unsynchronized lyrics")
+                        halign: "right"
+                    
+                    MDSwitch:
+                        id: switch_lyrics_type
+                        active: app.synchronized_lyrics
+                        width: dp(64)
+                        on_active: app.lyrics_type_change()
+                    
+                    MDLabel:
+                        text: app.loc.get("Synchronized lyrics")
+
+                MDFillRoundFlatIconButton:
+                    text: app.loc.get("Toggle theme")
+                    icon: "theme-light-dark"
+                    on_press: app.theme_toggle()
+
+                MDTextField:
+                    id: text_localization
+                    hint_text: app.loc.get("Language")
+                    on_focus:
+                        if self.focus: app.localization_menu.open()
+                        if self.focus: Window.release_all_keyboards()

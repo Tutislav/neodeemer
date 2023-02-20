@@ -100,6 +100,8 @@ class Neodeemer(MDApp):
     loc = Localization()
     format_mp3 = False
     create_subfolders = True
+    save_lyrics = True
+    synchronized_lyrics = False
     selected_tracks = []
     download_queue = []
     download_queue_info = {
@@ -192,8 +194,11 @@ class Neodeemer(MDApp):
             elif screen_name == "SettingsScreen":
                 if not hasattr(self, "localization_menu"):
                     self.switch_format = screen.ids.switch_format
-                    self.check_create_subfolders = screen.ids.check_create_subfolders
+                    self.switch_create_subfolders = screen.ids.switch_create_subfolders
                     self.text_music_folder_path = screen.ids.text_music_folder_path
+                    self.switch_save_lyrics = screen.ids.switch_save_lyrics
+                    self.options_lyrics = screen.ids.options_lyrics
+                    self.switch_lyrics_type = screen.ids.switch_lyrics_type
                     self.text_localization = screen.ids.text_localization
                     self.localization_menu_list = [
                         {
@@ -444,7 +449,7 @@ class Neodeemer(MDApp):
                 if not track["locked"]:
                     track["locked"] = True
                     if any(state == track["state"] for state in [TrackStates.UNKNOWN, TrackStates.FOUND, TrackStates.SAVED]):
-                        Download(track, self.s, self.download_queue_info).download_track()
+                        Download(track, self.s, self.download_queue_info, self.save_lyrics, self.synchronized_lyrics).download_track()
                     track["locked"] = False
                 else:
                     continue
@@ -711,7 +716,7 @@ class Neodeemer(MDApp):
         self.settings_save()
 
     def create_subfolders_change(self):
-        self.create_subfolders = self.check_create_subfolders.active
+        self.create_subfolders = self.switch_create_subfolders.active
         self.settings_save()
     
     def music_folder_path_change(self):
@@ -725,6 +730,16 @@ class Neodeemer(MDApp):
     
     def file_manager_close(self, *args):
         self.file_manager.close()
+    
+    def save_lyrics_change(self):
+        self.save_lyrics = self.switch_save_lyrics.active
+        self.options_lyrics.height = int(self.save_lyrics) * 40
+        self.options_lyrics.opacity = int(self.save_lyrics)
+        self.settings_save()
+
+    def lyrics_type_change(self):
+        self.synchronized_lyrics = self.switch_lyrics_type.active
+        self.settings_save()
     
     def theme_toggle(self):
         if self.theme_cls.theme_style == "Light":
@@ -760,6 +775,10 @@ class Neodeemer(MDApp):
                 if "format_mp3" in data:
                     self.format_mp3 = data["format_mp3"]
                 self.create_subfolders = data["create_subfolders"]
+                if "save_lyrics" in data:
+                    self.save_lyrics = data["save_lyrics"]
+                if "synchronized_lyrics" in data:
+                    self.synchronized_lyrics = data["synchronized_lyrics"]
                 self.theme_cls.theme_style = data["theme"]
                 self.loc.set_lang(data["lang"])
                 if "playlist_last" in data:
@@ -773,6 +792,8 @@ class Neodeemer(MDApp):
                 "music_folder_path": self.music_folder_path,
                 "format_mp3": self.format_mp3,
                 "create_subfolders": self.create_subfolders,
+                "save_lyrics": self.save_lyrics,
+                "synchronized_lyrics": self.synchronized_lyrics,
                 "theme": self.theme_cls.theme_style,
                 "lang": self.loc.get_lang(),
                 "playlist_last": self.playlist_last

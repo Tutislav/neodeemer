@@ -14,12 +14,13 @@ from tools import HEADERS, TrackStates
 
 
 class Download():
-    def __init__(self, track_dict: dict, spotifyloader: SpotifyLoader, download_queue_info: dict, save_lyrics: bool = True):
+    def __init__(self, track_dict: dict, spotifyloader: SpotifyLoader, download_queue_info: dict, save_lyrics: bool = True, synchronized_lyrics: bool = False):
         self.track_dict = track_dict
         self.spotifyloader = spotifyloader
         self.download_queue_info = download_queue_info
         self.downloaded_bytes_prev = 0
         self.save_lyrics = save_lyrics
+        self.synchronized_lyrics = synchronized_lyrics
         if self.save_lyrics:
             self.lyrics = Lyrics()
         
@@ -90,6 +91,12 @@ class Download():
             if self.save_lyrics:
                 try:
                     mtag["lyrics"] = self.lyrics.find_lyrics(self.track_dict)
+                    if self.synchronized_lyrics:
+                        lyrics = self.lyrics.find_lyrics(self.track_dict, self.synchronized_lyrics)
+                        if lyrics != "":
+                            lrc_file_path = file_path[:-4] + ".lrc"
+                            with open(lrc_file_path, "w", encoding="utf-8") as lrc_file:
+                                lrc_file.write(lyrics)
                 except:
                     pass
             mtag.save()
