@@ -141,6 +141,7 @@ class Neodeemer(MDApp):
             except:
                 self.music_folder_path = os.path.join(primary_external_storage_path(), "Music")
             self.file_manager_default_path = primary_external_storage_path()
+            self.download_threads_count = 2
         else:
             try:
                 self.music_folder_path
@@ -150,6 +151,7 @@ class Neodeemer(MDApp):
                     path = self.user_data_dir
                 self.music_folder_path = path
             self.file_manager_default_path = os.path.expanduser("~")
+            self.download_threads_count = 5
         Clock.schedule_once(self.after_start, 2)
         self.tab_switch(self.tracks_tab)
         return
@@ -161,7 +163,7 @@ class Neodeemer(MDApp):
         self.y = YoutubeLoader(self.music_folder_path, self.format_mp3, self.create_subfolders, self.label_loading_info)
         self.watchdog = Thread()
         self.play_track = Thread()
-        for i in range(1, 6):
+        for i in range(1, self.download_threads_count + 1):
             globals()[f"download_tracks_{i}"] = Thread()
         self.navigation_menu_list = self.root.ids.navigation_menu_list
         if check_update_available(__version__):
@@ -252,7 +254,12 @@ class Neodeemer(MDApp):
         mdlist_artists.clear_widgets()
         for artist in artists:
             if len(artist["artist_genres"]) > 0:
-                secondary_text = str(artist["artist_genres"])
+                genres = ""
+                for i, genre in enumerate(artist["artist_genres"]):
+                    genres += genre
+                    if i < (len(artist["artist_genres"]) - 1):
+                        genres += ", "
+                secondary_text = genres
             else:
                 secondary_text = " "
             line = ListLineArtist(text=artist["artist_name"], secondary_text=secondary_text, artist_dict=artist, on_press=lambda widget:self.load_in_thread(self.albums_load, self.albums_show, widget.artist_dict))
@@ -433,7 +440,7 @@ class Neodeemer(MDApp):
         else:
             mdlist_tracks = self.screen_cur.ids.mdlist_tracks
         self.mdlist_set_mode(mdlist_tracks, 0)
-        for i in range(1, 6):
+        for i in range(1, self.download_threads_count + 1):
             if not globals()[f"download_tracks_{i}"].is_alive():
                 globals()[f"download_tracks_{i}"] = Thread(target=self.download_tracks_from_queue, name=f"download_tracks_{i}")
                 globals()[f"download_tracks_{i}"].start()
@@ -445,7 +452,7 @@ class Neodeemer(MDApp):
     def download_tracks_from_queue(self):
         while self.download_queue_info["position"] != len(self.download_queue):
             for track in self.download_queue:
-                sleep(randint(0, 20) / 100)
+                sleep(randint(0, self.download_threads_count * 4) / 100)
                 if not track["locked"]:
                     track["locked"] = True
                     if any(state == track["state"] for state in [TrackStates.UNKNOWN, TrackStates.FOUND, TrackStates.SAVED]):
