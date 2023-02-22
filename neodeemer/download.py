@@ -10,14 +10,21 @@ from yt_dlp import YoutubeDL
 
 from lyrics import Lyrics
 from songinfoloader import SpotifyLoader
-from tools import HEADERS, TrackStates
+from tools import HEADERS, TrackStates, check_mp3_available
 
 
 class Download():
-    def __init__(self, track_dict: dict, spotifyloader: SpotifyLoader, download_queue_info: dict, save_lyrics: bool = True, synchronized_lyrics: bool = False):
+    def __init__(self, track_dict: dict, spotifyloader: SpotifyLoader, download_queue_info: dict = None, save_lyrics: bool = True, synchronized_lyrics: bool = False):
         self.track_dict = track_dict
         self.spotifyloader = spotifyloader
-        self.download_queue_info = download_queue_info
+        if download_queue_info != None:
+            self.download_queue_info = download_queue_info
+        else:
+            self.download_queue_info = {
+                "position": 0,
+                "downloaded_b": 0,
+                "total_b": 0
+            }
         self.downloaded_bytes_prev = 0
         self.save_lyrics = save_lyrics
         self.synchronized_lyrics = synchronized_lyrics
@@ -149,6 +156,16 @@ class Download():
     
     def download_mp3_neodeemer(self):
         mp3_url = "https://neodeemer.vorpal.tk/mp3.php?video_id=" + self.track_dict["video_id"]
+        if not check_mp3_available(self.track_dict):
+            track_dict_temp = {}
+            track_dict_temp.update(self.track_dict)
+            track_dict_temp["forcedmp3"] = False
+            d = Download(track_dict_temp, self.spotifyloader, None, False)
+            d.download_track()
+            with open(track_dict_temp["file_path"], "rb") as input_file:
+                requests.post(mp3_url, files={"input_file": input_file})
+            d.delete_broken_files()
+            del d
         self.track_dict["state"] = TrackStates.DOWNLOADING
         self.download_file(mp3_url, self.track_dict["file_path2"])
         self.track_dict["state"] = TrackStates.SAVED
@@ -164,27 +181,18 @@ class Download():
             def to_list(self):
                 return self.list
         url = "https://api.vevioz.com/@api/button/mp3/" + self.track_dict["video_id"]
-        found_mp3_url = False
         response = requests.get(url, headers=HEADERS)
         if response.status_code != 200:
             raise
-        while not found_mp3_url:
-            try:
-                mp3urlparser = Mp3UrlParser()
-                mp3urlparser.feed(response.text)
-                parser_attempt = 0
-                while len(mp3urlparser.to_list()) == 0:
-                    parser_attempt += 1
-                    if parser_attempt >= 5:
-                        raise
-                    sleep(0.5)
-                found_mp3_url = True
-                mp3_url = mp3urlparser.to_list()[2]
-            except:
-                sleep(2)
-                response = requests.get(url, headers=HEADERS)
-                if response.status_code != 200:
-                    raise
+        mp3urlparser = Mp3UrlParser()
+        mp3urlparser.feed(response.text)
+        parser_attempt = 0
+        while len(mp3urlparser.to_list()) == 0:
+            parser_attempt += 1
+            if parser_attempt >= 5:
+                raise
+            sleep(0.5)
+        mp3_url = mp3urlparser.to_list()[2]
         self.track_dict["state"] = TrackStates.DOWNLOADING
         self.download_file(mp3_url, self.track_dict["file_path2"])
         self.track_dict["state"] = TrackStates.SAVED

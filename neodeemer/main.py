@@ -506,12 +506,7 @@ class Neodeemer(MDApp):
                                 self.s.track_find_video_id(track_dict_temp)
                             open_url("https://youtu.be/" + track_dict_temp["video_id"], platform)
                         else:
-                            download_queue_info_temp = {
-                                "position": 0,
-                                "downloaded_b": 0,
-                                "total_b": 0
-                            }
-                            Download(track_dict_temp, self.s, download_queue_info_temp, False).download_track()
+                            Download(track_dict_temp, self.s, None, False).download_track()
                         track_dict["video_id"] = track_dict_temp["video_id"]
                         track_dict["state"] = track_dict_temp["state"]
                 if track_dict_temp["forcedmp3"]:
