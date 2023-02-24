@@ -30,7 +30,7 @@ def norm(text, keepdiacritic=False, keepcase=False):
     return text
 
 def clean_track_name(track_name):
-    endings = ["original", "from", "remastered", "remake", "remaster", "music", "radio", "mix"]
+    endings = ["original", "from", "remastered", "remake", "remaster", "music", "radio", "mix", "featuring", "new version"]
     track_name = track_name.lower()
     for ending in endings:
         if " - " in track_name and ending in track_name:

@@ -12,7 +12,7 @@ from yt_dlp import YoutubeDL
 from youtube_search import YoutubeSearch
 from ytmusicapi import YTMusic
 
-from tools import (TrackStates, contains_artist_track, contains_date, contains_separate_word, contains_part, mstostr, norm, strtoms,
+from tools import (TrackStates, clean_track_name, contains_artist_track, contains_date, contains_separate_word, contains_part, mstostr, norm, strtoms,
                    track_file_state)
 
 
@@ -261,7 +261,7 @@ class SpotifyLoader(Base):
         excluded_words = self.ytsfilter["excluded_words"]
         artist_name2 = norm(track_dict["artist_name"])
         album_name2 = norm(track_dict["album_name"])
-        track_name2 = norm(track_dict["track_name"])
+        track_name2 = norm(clean_track_name(track_dict["track_name"]))
         track_duration_s = track_dict["track_duration_ms"] / 1000
         max_results = 5
         text = track_dict["artist_name"] + " " + track_dict["track_name"]
