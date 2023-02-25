@@ -390,6 +390,7 @@ class YoutubeLoader(Base):
             video_id = track.video_id
             video_channel = track.author
         file_path = os.path.join(self.music_folder_path, norm(track_name, True, True) + ".m4a")
+        file_path2 = os.path.join(self.music_folder_path, norm(track_name, True, True) + ".mp3")
         track_dict = {
             "artist_name": "",
             "artist_name2": "",
@@ -409,11 +410,13 @@ class YoutubeLoader(Base):
             "reason": "",
             "folder_path": self.music_folder_path,
             "file_path": file_path,
-            "file_path2": file_path,
+            "file_path2": file_path2,
             "locked": False,
-            "state": TrackStates.FOUND,
             "video_channel": video_channel
         }
+        track_dict.update({"state": track_file_state(track_dict)})
+        if track_dict["state"] != TrackStates.COMPLETED:
+            track_dict["state"] = TrackStates.FOUND
         return track_dict
     
     def tracks_search(self, track_name):

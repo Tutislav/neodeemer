@@ -158,7 +158,7 @@ class Lyricsify():
 
     def find_lyrics(self, track_dict: dict):
         lyrics = ""
-        tracks = self.search(norm(track_dict["artist_name2"] + " - " + clean_track_name(track_dict["track_name"])))
+        tracks = self.search(norm(track_dict["artist_name"] + " - " + clean_track_name(track_dict["track_name"])))
         for track in tracks:
             if contains_artist_track(track["name"], track_dict["artist_name2"], track_dict["track_name"]):
                 lyrics = self.get_lyrics(track["url"])
