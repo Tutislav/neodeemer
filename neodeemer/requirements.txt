@@ -1,7 +1,7 @@
 certifi==2022.12.7
 ffpyplayer
 Kivy==2.1.0
-kivymd==1.1.1
+kivymd==1.0.2
 music_tag==0.4.3
 plyer==2.1.0
 python-dotenv==0.21.1
