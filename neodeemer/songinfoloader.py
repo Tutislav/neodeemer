@@ -112,6 +112,8 @@ class SpotifyLoader(Base):
             artist_dict = self.artist_to_dict(artist)
         if album["release_date_precision"] == "day":
             album_year = datetime.strptime(album["release_date"], "%Y-%m-%d").strftime("%Y")
+        elif album["release_date_precision"] == "month":
+            album_year = datetime.strptime(album["release_date"], "%Y-%m").strftime("%Y")
         else:
             album_year = album["release_date"]
         album_dict = {}
