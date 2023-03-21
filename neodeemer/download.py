@@ -95,7 +95,7 @@ class Download():
             mtag["tracktitle"] = self.track_dict["track_name"]
             mtag["tracknumber"] = self.track_dict["track_number"]
             mtag["comment"] = self.track_dict["video_id"]
-            if self.save_lyrics:
+            if self.save_lyrics and self.track_dict["artist_name"] != "":
                 try:
                     mtag["lyrics"] = self.lyrics.find_lyrics(self.track_dict)
                     if self.synchronized_lyrics:
