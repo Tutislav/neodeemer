@@ -14,11 +14,6 @@ from neodeemer.tools import TrackStates, track_file_state
 
 
 class TestSearchDownload(unittest.TestCase):
-    download_queue_info = {
-        "position": 0,
-        "downloaded_b": 0,
-        "total_b": 0
-    }
     music_folder_path = tempfile.mkdtemp()
     s = SpotifyLoader("CZ", music_folder_path, False, True)
     y = YoutubeLoader(music_folder_path, False, True)
@@ -43,9 +38,18 @@ class TestSearchDownload(unittest.TestCase):
                 self.s.track_find_video_id(track)
             self.assertIsNot(track["video_id"], None)
 
-    def test_d_download(self):
+    def test_d_download_m4a(self):
         for track in self.tracks:
-            Download(track, self.s, self.download_queue_info).download_track()
+            Download(track, self.s, None).download_track()
+            self.assertEqual(track_file_state(track).value, TrackStates.COMPLETED.value)
+
+    def test_e_cleanup(self):
+        shutil.rmtree(self.music_folder_path)
+
+    def test_f_download_mp3(self):
+        for track in self.tracks:
+            track["forcedmp3"] = True
+            Download(track, self.s, None).download_track()
             self.assertEqual(track_file_state(track).value, TrackStates.COMPLETED.value)
 
     def test_z_cleanup(self):

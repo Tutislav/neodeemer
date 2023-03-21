@@ -14,11 +14,6 @@ from neodeemer.tools import TrackStates, track_file_state
 
 
 class TestPlaylistDownload(unittest.TestCase):
-    download_queue_info = {
-        "position": 0,
-        "downloaded_b": 0,
-        "total_b": 0
-    }
     music_folder_path = tempfile.mkdtemp()
     s = SpotifyLoader("CZ", music_folder_path, False, True)
     y = YoutubeLoader(music_folder_path, False, True)
@@ -44,7 +39,7 @@ class TestPlaylistDownload(unittest.TestCase):
 
     def test_d_download(self):
         for track in self.tracks:
-            Download(track, self.s, self.download_queue_info).download_track()
+            Download(track, self.s, None).download_track()
             self.assertEqual(track_file_state(track).value, TrackStates.COMPLETED.value)
 
     def test_e_splaylist_file(self):

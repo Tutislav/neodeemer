@@ -8,14 +8,14 @@ on:
 
   workflow_dispatch:
   schedule:
-    - cron: "33 3 */10 * *"
+    - cron: "33 3 15 * *"
 
 jobs:
   test:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ["3.8", "3.9", "3.10"]
+        python-version: ["3.8", "3.9", "3.10", "3.11"]
 
     steps:
       - name: Checkout
