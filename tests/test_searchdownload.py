@@ -19,6 +19,7 @@ class TestSearchDownload(unittest.TestCase):
     y = YoutubeLoader(music_folder_path, False, True)
     tracks_names = ["Jason Charles Miller Rules of Nature", "Morčata Na Útěku Outro", "Laura Branigan Self Control", "Dymytry Černí Andělé", "Imagine Dragons Enemy"]
     tracks = []
+    tracks2 = []
 
     def test_a_spotifysearch(self):
         for track_name in self.tracks_names:
@@ -37,6 +38,9 @@ class TestSearchDownload(unittest.TestCase):
             if track["state"].value == TrackStates.UNKNOWN.value and track["video_id"] == None:
                 self.s.track_find_video_id(track)
             self.assertIsNot(track["video_id"], None)
+            track2 = {}
+            track2.update(track)
+            self.tracks2.append(track2)
 
     def test_d_download_m4a(self):
         for track in self.tracks:
@@ -47,7 +51,7 @@ class TestSearchDownload(unittest.TestCase):
         shutil.rmtree(self.music_folder_path)
 
     def test_f_download_mp3(self):
-        for track in self.tracks:
+        for track in self.tracks2:
             track["forcedmp3"] = True
             Download(track, self.s, None).download_track()
             self.assertEqual(track_file_state(track).value, TrackStates.COMPLETED.value)
