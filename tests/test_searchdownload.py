@@ -17,7 +17,7 @@ class TestSearchDownload(unittest.TestCase):
     music_folder_path = tempfile.mkdtemp()
     s = SpotifyLoader("CZ", music_folder_path, False, True)
     y = YoutubeLoader(music_folder_path, False, True)
-    tracks_names = ["Jason Charles Miller Rules of Nature", "Morčata Na Útěku Outro", "Laura Branigan Self Control", "Dymytry Černí Andělé", "Imagine Dragons Enemy"]
+    tracks_names = ["Jason Charles Miller Rules of Nature", "Mandrage Františkovy Lázně", "Laura Branigan Self Control", "Dymytry Černí Andělé", "Imagine Dragons Enemy"]
     tracks = []
     tracks2 = []
 
@@ -40,6 +40,7 @@ class TestSearchDownload(unittest.TestCase):
             self.assertIsNot(track["video_id"], None)
             track2 = {}
             track2.update(track)
+            track2["forcedmp3"] = True
             self.tracks2.append(track2)
 
     def test_d_download_m4a(self):
@@ -52,7 +53,6 @@ class TestSearchDownload(unittest.TestCase):
 
     def test_f_download_mp3(self):
         for track in self.tracks2:
-            track["forcedmp3"] = True
             Download(track, self.s, None).download_track()
             self.assertEqual(track_file_state(track).value, TrackStates.COMPLETED.value)
 

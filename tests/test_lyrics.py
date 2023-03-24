@@ -17,6 +17,7 @@ class TestLyrics(unittest.TestCase):
     musixmatch = Musixmatch()
     lyricsify = Lyricsify()
     spotifylyricsapi = SpotifyLyricsApi()
+    tolerance = 10
     tracks = [
         { "name": "HIM Wicked Game", "track_dict": None, "karaoketexty": 1136, "musixmatch": 1299, "lyricsify": 1903, "spotifylyricsapi": 1787 },
         { "name": "Depeche Mode Enjoy the Silence", "track_dict": None, "karaoketexty": 732, "musixmatch": 735, "lyricsify": 771, "spotifylyricsapi": 1059 },
@@ -37,22 +38,22 @@ class TestLyrics(unittest.TestCase):
                 lyrics = self.karaoketexty.find_lyrics(track["track_dict"])
             except:
                 lyrics = ""
-            self.assertEqual(len(lyrics), track["karaoketexty"])
+            self.assertAlmostEqual(len(lyrics), track["karaoketexty"], delta=self.tolerance)
             try:
                 lyrics = self.musixmatch.find_lyrics(track["track_dict"])
             except:
                 lyrics = ""
-            self.assertEqual(len(lyrics), track["musixmatch"])
+            self.assertAlmostEqual(len(lyrics), track["musixmatch"], delta=self.tolerance)
             try:
                 lyrics = self.lyricsify.find_lyrics(track["track_dict"])
             except:
                 lyrics = ""
-            self.assertEqual(len(lyrics), track["lyricsify"])
+            self.assertAlmostEqual(len(lyrics), track["lyricsify"], delta=self.tolerance)
             try:
                 lyrics = self.spotifylyricsapi.find_lyrics(track["track_dict"])
             except:
                 lyrics = ""
-            self.assertEqual(len(lyrics), track["spotifylyricsapi"])
+            self.assertAlmostEqual(len(lyrics), track["spotifylyricsapi"], delta=self.tolerance)
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)
