@@ -111,6 +111,7 @@ class Neodeemer(MDApp):
     }
     playlist_queue = []
     unavailable_tracks = []
+    intent_url = ""
     sound = None
     playlist_last = {
         "spotify": {},
@@ -135,6 +136,7 @@ class Neodeemer(MDApp):
         self.tracks_tab = self.screen_cur.ids.tracks_tab
         self.file_manager = MDFileManager(exit_manager=self.file_manager_close, select_path=self.file_manager_select)
         if platform == "android":
+            from android import activity, autoclass, mActivity
             from android.storage import primary_external_storage_path
             try:
                 self.music_folder_path
@@ -142,6 +144,10 @@ class Neodeemer(MDApp):
                 self.music_folder_path = os.path.join(primary_external_storage_path(), "Music")
             self.file_manager_default_path = primary_external_storage_path()
             self.download_threads_count = 2
+            self.IntentClass = autoclass("android.content.Intent")
+            self.intent = mActivity.getIntent()
+            self.on_new_intent(self.intent)
+            activity.bind(on_new_intent=self.on_new_intent)
         else:
             try:
                 self.music_folder_path
@@ -177,6 +183,35 @@ class Neodeemer(MDApp):
                 MDFlatButton(text=self.loc.get("Cancel"), on_press=lambda x:self.submit_bug_dialog.dismiss())
             ]
         )
+        if self.intent_url != "":
+            if "youtube.com" in self.intent_url or "youtu.be" in self.intent_url:
+                tracks = self.y.tracks_search(self.intent_url)
+                if len(tracks) > 0:
+                    self.download([tracks[0]])
+            elif "spotify.com" in self.intent_url:
+                intent_parts = self.intent_url.split("/")
+                spotify_id = intent_parts[len(intent_parts) - 1]
+                if "?" in spotify_id:
+                    spotify_id = spotify_id.split("?")[0]
+                if "/artist/" in self.intent_url:
+                    artist = self.s.artist(spotify_id)
+                    if artist != None:
+                        self.tab_switch(self.albums_tab)
+                        self.load_in_thread(self.albums_load, self.albums_show, artist)
+                elif "/album/" in self.intent_url:
+                    album = self.s.album(spotify_id)
+                    if album != None:
+                        self.tab_switch(self.tracks_tab)
+                        self.load_in_thread(self.tracks_load, self.tracks_show, album)
+                elif "/track/" in self.intent_url:
+                    track = self.s.track(spotify_id)
+                    if track != None:
+                        self.download([track])
+                elif "/playlist/" in self.intent_url:
+                    self.screen_switch("SPlaylistScreen")
+                    self.text_playlist_last.text = spotify_id
+                    self.load_in_thread(self.playlist_load, self.tracks_actions_show, show_arg=True, show_arg2=True)
+            self.intent_url = ""
     
     def screen_switch(self, screen_name, direction="left"):
         if not self.screen_manager.has_screen(screen_name):
@@ -238,6 +273,14 @@ class Neodeemer(MDApp):
     def on_tab_switch(self, instance_tabs, instance_tab, instance_tab_label, tab_text):
         self.tab_cur = instance_tab
     
+    def on_new_intent(self, intent):
+        action = intent.getAction()
+        if action == self.IntentClass.ACTION_SEND:
+            mime_type = intent.getType()
+            if mime_type == "text/plain":
+                text = intent.getStringExtra(self.IntentClass.EXTRA_TEXT)
+                self.intent_url = text
+
     def artists_load(self):
         text = self.artists_tab.ids.text_artists_search.text
         artists = self.s.artists_search(text)

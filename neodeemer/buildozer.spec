@@ -54,6 +54,9 @@ android.ndk_api = 21
 # In past, was `android.arch` as we weren't supporting builds for multiple archs at the same time.
 android.archs = arm64-v8a, armeabi-v7a
 
+# (str) XML file to include as an intent filters in <activity> tag
+android.manifest.intent_filters = %(source.dir)s/data/intentfilters.xml
+
 # (bool) enables Android auto backup feature (Android API >=23)
 android.allow_backup = True
 
@@ -61,7 +64,7 @@ android.allow_backup = True
 p4a.commit = 227a765
 
 # (str) Filename to the hook for p4a
-p4a.hook = p4a/hook.py
+p4a.hook = %(source.dir)s/p4a/hook.py
 
 [buildozer]
 

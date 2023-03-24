@@ -191,6 +191,27 @@ class SpotifyLoader(Base):
                 list.append(self.track_to_dict(track))
         return list
     
+    def artist(self, artist_id):
+        try:
+            artist_dict = self.artist_to_dict(self.spotify.artist({"id": artist_id}))
+        except:
+            artist_dict = None
+        return artist_dict
+    
+    def album(self, album_id):
+        try:
+            album_dict = self.album_to_dict(self.spotify.album(album_id, self.market))
+        except:
+            album_dict = None
+        return album_dict
+    
+    def track(self, track_id):
+        try:
+            track_dict = self.track_to_dict(self.spotify.track(track_id, self.market))
+        except:
+            track_dict = None
+        return track_dict
+
     def artist_albums(self, artist_dict, page=0):
         list = []
         limit, offset = self.limit_offset(page)
