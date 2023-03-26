@@ -201,7 +201,9 @@ def contains_date(text, compare_text=None):
                         contains = True
                 except:
                     pass
-    return contains
+        return contains, dates[0]
+    else:
+        return contains, None
 
 def contains_artist_track(text, artist_name=None, track_name=None):
     contains = False

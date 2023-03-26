@@ -201,6 +201,8 @@ class Download():
         self.create_subfolders()
         if self.track_dict["state"] == TrackStates.UNKNOWN and self.track_dict["video_id"] == None:
             self.spotifyloader.track_find_video_id(self.track_dict)
+        elif self.track_dict["state"] == TrackStates.FOUND and self.track_dict["artist_name"] == "":
+            self.spotifyloader.track_find_spotify_metadata(self.track_dict)
         if self.track_dict["state"] == TrackStates.FOUND:
             if not self.track_dict["forcedmp3"]:
                 try:

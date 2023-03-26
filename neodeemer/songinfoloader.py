@@ -397,19 +397,56 @@ class SpotifyLoader(Base):
         if video_id != None:
             track_dict["video_id"] = video_id
             track_dict["state"] = TrackStates.FOUND
+    
+    def track_find_spotify_metadata(self, track_dict):
+        if track_dict["state"] == TrackStates.FOUND and track_dict["artist_name"] == "":
+            options = self.ytsfilter["options"]
+            excluded_words = self.ytsfilter["excluded_words"]
+            video_title = norm(track_dict["track_name"])
+            video_channel = norm(track_dict["video_channel"])
+            video_duration_s = track_dict["track_duration_ms"] / 1000
+            tracks = self.tracks_search(track_dict["track_name"], 1)
+            for track in tracks:
+                artist_name2 = norm(track["artist_name"])
+                track_name2 = norm(track["track_name"])
+                track_duration_s = track["track_duration_ms"] / 1000
+                if video_duration_s >= (track_duration_s - options["video_duration_tolerance_s"]) and video_duration_s <= (track_duration_s + options["video_duration_tolerance_s"]):
+                    if contains_artist_track(video_title, artist_name2, track_name2) or contains_artist_track(video_channel, artist_name2):
+                        if contains_artist_track(video_title, track_name=track_name2):
+                            contains = False
+                            for word in excluded_words:
+                                if word in video_title and not word in track_name2:
+                                        if contains_separate_word(video_title, word):
+                                            contains = True
+                            if contains:
+                                continue
+                            track["video_id"] = track_dict["video_id"]
+                            track["state"] = track_dict["state"]
+                            track["locked"] = track_dict["locked"]
+                            contains, date = contains_date(track_dict["track_name"], track_name2)
+                            if contains:
+                                track["track_name"] = track["track_name"] + " (" + date + ")"
+                                track["folder_path"] = track_dict["folder_path"]
+                                track["file_path"] = track_dict["file_path"]
+                                track["file_path2"] = track_dict["file_path2"]
+                            track_dict.update(track)
+                            break
 
 class YoutubeLoader(Base):
     def track_to_dict(self, track, playlist=False):
         if not playlist:
             track_name = track["title"]
             if type(track["duration"]) is str:
+                track_duration_ms = strtoms(track["duration"])
                 track_duration_str = track["duration"]
             else:
+                track_duration_ms = track["duration"] * 1000
                 track_duration_str = mstostr(track["duration"] * 1000)
             video_id = track["id"]
             video_channel = track["channel"]
         else:
             track_name = track.title
+            track_duration_ms = track.length * 1000
             track_duration_str = mstostr(track.length * 1000)
             video_id = track.video_id
             video_channel = track.author
@@ -425,6 +462,7 @@ class YoutubeLoader(Base):
             "album_year": 0,
             "album_image": "",
             "track_name": track_name,
+            "track_duration_ms": track_duration_ms,
             "track_duration_str": track_duration_str,
             "track_number": 0,
             "track_size_b": None,
