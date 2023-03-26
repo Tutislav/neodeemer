@@ -159,10 +159,11 @@ class Neodeemer(MDApp):
             self.file_manager_default_path = os.path.expanduser("~")
             self.download_threads_count = 5
         Clock.schedule_once(self.after_start, 2)
-        self.tab_switch(self.tracks_tab)
+        self.tab_switch(self.albums_tab)
         return
     
     def after_start(self, *args):
+        self.tab_switch(self.tracks_tab)
         self.loading = MDDialog(type="custom", content_cls=Loading(), md_bg_color=(0, 0, 0, 0))
         self.label_loading_info = self.loading.children[0].children[2].children[0].ids.label_loading_info
         self.s = SpotifyLoader(self.loc.get_market(), self.music_folder_path, self.format_mp3, self.create_subfolders, self.label_loading_info, resource_find(".env"), resource_find("data/ytsfilter.json"), os.path.join(self.user_data_dir, ".cache"))

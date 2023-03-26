@@ -19,9 +19,9 @@ CZ = {
     "Error while downloading": "Chyba při stahování",
     #navigation_menu
     "Spotify search": "Vyhledávání na Spotify",
-    "Saved songs will have tags": "Hudba se zařadí do alb",
+    "Tracks, Albums and Artists": "Skladby, Alba a Interpreti",
     "YouTube search": "Vyhledávání na YouTube",
-    "Saved songs won't have tags": "Hudba se nezařadí do alb",
+    "Videos": "Videa",
     "Spotify playlist": "Spotify playlist",
     "YouTube playlist": "YouTube playlist",
     "Settings": "Nastavení",

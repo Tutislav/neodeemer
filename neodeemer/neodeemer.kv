@@ -16,22 +16,29 @@ MDScreen:
                     
                     TwoLineAvatarListItem:
                         text: app.loc.get("Spotify search")
-                        secondary_text: app.loc.get("Saved songs will have tags")
+                        secondary_text: app.loc.get("Tracks, Albums and Artists")
                         on_press:
                             app.navigation_menu.set_state("close")
                             app.screen_switch("SpotifyScreen")
                         
                         IconLeftWidget:
-                            icon: "magnify"
+                            icon: "spotify"
+                            on_press:
+                                app.navigation_menu.set_state("close")
+                                app.screen_switch("SpotifyScreen")
+
                     TwoLineAvatarListItem:
                         text: app.loc.get("YouTube search")
-                        secondary_text: app.loc.get("Saved songs won't have tags")
+                        secondary_text: app.loc.get("Videos")
                         on_press:
                             app.navigation_menu.set_state("close")
                             app.screen_switch("YouTubeScreen")
                         
                         IconLeftWidget:
-                            icon: "magnify"
+                            icon: "youtube"
+                            on_press:
+                                app.navigation_menu.set_state("close")
+                                app.screen_switch("YouTubeScreen")
                     
                     OneLineAvatarListItem:
                         text: app.loc.get("Spotify playlist")
@@ -41,6 +48,9 @@ MDScreen:
                         
                         IconLeftWidget:
                             icon: "playlist-music"
+                            on_press:
+                                app.navigation_menu.set_state("close")
+                                app.screen_switch("SPlaylistScreen")
                     
                     OneLineAvatarListItem:
                         text: app.loc.get("YouTube playlist")
@@ -50,6 +60,9 @@ MDScreen:
                         
                         IconLeftWidget:
                             icon: "playlist-music"
+                            on_press:
+                                app.navigation_menu.set_state("close")
+                                app.screen_switch("YPlaylistScreen")
                     
                     OneLineAvatarListItem:
                         text: app.loc.get("Settings")
@@ -59,6 +72,9 @@ MDScreen:
                         
                         IconLeftWidget:
                             icon: "cog"
+                            on_press:
+                                app.navigation_menu.set_state("close")
+                                app.screen_switch("SettingsScreen")
 
 <SpotifyScreen>:
     MDBoxLayout:
