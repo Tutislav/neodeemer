@@ -346,7 +346,7 @@ class SpotifyLyricsApi():
     
     def find_lyrics(self, track_dict: dict):
         lyrics = ""
-        with request.urlopen(self.lyrics_url + track_dict["spotify_id"]) as urldata:
+        with request.urlopen(self.lyrics_url + track_dict["track_id"]) as urldata:
             lyrics_data = json.loads(urldata.read().decode())
             if not lyrics_data["error"]:
                 if lyrics_data["syncType"] == "LINE_SYNCED":
