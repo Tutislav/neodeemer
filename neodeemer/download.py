@@ -30,6 +30,7 @@ class Download():
         self.synchronized_lyrics = synchronized_lyrics
         if self.save_lyrics:
             self.lyrics = Lyrics()
+        self.download_attempt = 0
         
     def download_on_progress(self, stream=None, chunk=None, bytes_remaining=None):
         if type(stream) is dict:
@@ -199,44 +200,49 @@ class Download():
     
     def download_track(self):
         self.create_subfolders()
-        if self.track_dict["state"] == TrackStates.UNKNOWN and self.track_dict["video_id"] == None:
-            self.spotifyloader.track_find_video_id(self.track_dict)
-        elif self.track_dict["state"] == TrackStates.FOUND and self.track_dict["artist_name"] == "":
-            self.spotifyloader.track_find_spotify_metadata(self.track_dict)
-        if self.track_dict["state"] == TrackStates.FOUND:
-            if not self.track_dict["forcedmp3"]:
-                try:
-                    self.delete_broken_files()
-                    self.download_m4a_youtube_dl()
-                except:
+        while not any(state == self.track_dict["state"] for state in [TrackStates.UNAVAILABLE, TrackStates.COMPLETED]):
+            self.download_attempt += 1
+            if self.track_dict["state"] == TrackStates.UNKNOWN and self.track_dict["video_id"] == None:
+                self.spotifyloader.track_find_video_id(self.track_dict)
+            elif self.track_dict["state"] == TrackStates.FOUND and self.track_dict["artist_name"] == "":
+                self.spotifyloader.track_find_spotify_metadata(self.track_dict)
+            if self.track_dict["state"] == TrackStates.FOUND:
+                if not self.track_dict["forcedmp3"]:
                     try:
                         self.delete_broken_files()
-                        self.download_m4a_pytube()
+                        self.download_m4a_youtube_dl()
                     except:
-                        self.delete_broken_files()
-                        if not self.spotifyloader.format_mp3:
-                            self.track_dict["state"] = TrackStates.FOUND
-                            self.track_dict["forcedmp3"] = True
-                        else:
-                            self.track_dict["state"] = TrackStates.UNAVAILABLE
-                            self.track_dict["reason"] = "Error while downloading"
-            else:
-                try:
-                    self.delete_broken_files()
-                    self.download_mp3_neodeemer()
-                except:
+                        try:
+                            self.delete_broken_files()
+                            self.download_m4a_pytube()
+                        except:
+                            self.delete_broken_files()
+                            if not self.spotifyloader.format_mp3:
+                                self.track_dict["state"] = TrackStates.FOUND
+                                self.track_dict["forcedmp3"] = True
+                            else:
+                                self.track_dict["state"] = TrackStates.UNAVAILABLE
+                                self.track_dict["reason"] = "Error while downloading"
+                else:
                     try:
                         self.delete_broken_files()
-                        self.download_mp3_vevioz()
+                        self.download_mp3_neodeemer()
                     except:
-                        self.delete_broken_files()
-                        if self.spotifyloader.format_mp3:
-                            self.track_dict["state"] = TrackStates.FOUND
-                            self.track_dict["forcedmp3"] = False
-                        else:
-                            self.track_dict["state"] = TrackStates.UNAVAILABLE
-                            self.track_dict["reason"] = "Error while downloading"
-        if self.track_dict["state"] == TrackStates.SAVED:
-            self.save_tags()
-        if self.track_dict["state"] == TrackStates.UNAVAILABLE:
-            self.download_queue_info["position"] += 1
+                        try:
+                            self.delete_broken_files()
+                            self.download_mp3_vevioz()
+                        except:
+                            self.delete_broken_files()
+                            if self.spotifyloader.format_mp3:
+                                self.track_dict["state"] = TrackStates.FOUND
+                                self.track_dict["forcedmp3"] = False
+                            else:
+                                self.track_dict["state"] = TrackStates.UNAVAILABLE
+                                self.track_dict["reason"] = "Error while downloading"
+            if self.track_dict["state"] == TrackStates.SAVED:
+                self.save_tags()
+            if self.download_attempt >= 5:
+                self.track_dict["state"] = TrackStates.UNAVAILABLE
+                self.track_dict["reason"] = "Error while downloading"
+            if self.track_dict["state"] == TrackStates.UNAVAILABLE:
+                self.download_queue_info["position"] += 1
