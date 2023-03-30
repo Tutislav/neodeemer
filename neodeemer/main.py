@@ -253,8 +253,8 @@ class Neodeemer(MDApp):
                 for track in self.unavailable_tracks:
                     track_name = track["track_name"] + " - [b]" + track["artist_name"] + "[/b]"
                     secondary_text = self.loc.get(track["reason"])
-                    line = ListLineTrack(text=track_name, secondary_text=secondary_text)
-                    line.add_widget(IconLeftWidget(icon="alert"))
+                    line = ListLineTrack(text=track_name, secondary_text=secondary_text, track_dict=track)
+                    line.add_widget(IconLeftWidget(icon="alert", on_press=lambda widget:self.mdlist_on_press(widget)))
                     mdlist_tracks.add_widget(line)
         self.screen_manager.direction = direction
         self.screen_manager.current = screen_name
@@ -653,12 +653,14 @@ class Neodeemer(MDApp):
                 ["close", lambda x:self.mdlist_set_mode(instance_selection_list, 0)],
                 ["bug-outline", lambda x:self.submit_bug_dialog.open()]
             ]
-            self.tracks_actions_show()
+            if self.screen_cur.name != "ErrorScreen":
+                self.tracks_actions_show()
         else:
             bg_color = self.theme_cls.primary_color
             left_action_items = []
             instance_selection_list.unselected_all()
-            self.tracks_actions_show(False)
+            if self.screen_cur.name != "ErrorScreen":
+                self.tracks_actions_show(False)
         Animation(md_bg_color=bg_color, d=0.2).start(self.toolbar)
         self.toolbar.left_action_items = left_action_items
     

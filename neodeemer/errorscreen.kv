@@ -17,5 +17,8 @@
                 color: app.theme_cls.accent_dark
 
         ScrollView:
-            MDList:
+            MDSelectionListFix:
                 id: mdlist_tracks
+                on_selected: app.mdlist_selected(*args)
+                on_unselected: app.mdlist_unselected(*args)
+                on_selected_mode: app.mdlist_set_mode(*args)
