@@ -3,7 +3,7 @@
         "min_video_views": 300,
         "video_duration_tolerance_s": 150,
         "not_same_name_penalization": -10,
-        "contains_date_penalization": -5,
+        "contains_date_penalization": -10,
         "contains_word_title_penalization": -10,
         "contains_word_description_penalization": -5,
         "youtube_music_priority": 15,

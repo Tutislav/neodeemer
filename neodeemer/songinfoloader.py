@@ -294,12 +294,21 @@ class SpotifyLoader(Base):
             with YTMusic() as ytmusic:
                 tracks = ytmusic.search(text, "songs")
                 if len(tracks) > 0:
-                    track = tracks[0]
-                    track_artist = norm(track["artists"][0]["name"])
-                    track_name = norm(track["title"])
-                    if contains_artist_track(track_artist, artist_name2):
-                        if contains_artist_track(track_name, track_name=track_name2):
-                            video_id = track["videoId"]
+                    tracks = tracks[0:3]
+                    for track in tracks:
+                        track_artist = norm(track["artists"][0]["name"])
+                        track_name = norm(track["title"])
+                        if contains_artist_track(track_artist, artist_name2):
+                            if contains_artist_track(track_name, track_name=track_name2):
+                                contains_excluded = False
+                                for word in excluded_words:
+                                    if word in track_name and not word in track_name2:
+                                        if contains_separate_word(track_name, word):
+                                            contains_excluded = True
+                                            break
+                                if not contains_excluded:
+                                    video_id = track["videoId"]
+                                    break
                 if video_id == None:
                     album_text = track_dict["artist_name"] + " " + track_dict["album_name"]
                     albums = ytmusic.search(album_text, "albums")
@@ -322,6 +331,7 @@ class SpotifyLoader(Base):
                                                     break
                                         if not contains_excluded:
                                             video_id = track["videoId"]
+                                            break
         except:
             pass
         while video_id == None and track_dict["state"] != TrackStates.UNAVAILABLE:
@@ -361,7 +371,7 @@ class SpotifyLoader(Base):
                             if track_name2 == artist_name2:
                                 if not video_title.count(artist_name2) == 2:
                                     priority += options["not_same_name_penalization"]
-                            if contains_date(video["title"], track_name2):
+                            if contains_date(video["title"], track_name2)[0]:
                                 priority += options["contains_date_penalization"]
                             if any(word in video_channel for word in excluded_channels):
                                 continue

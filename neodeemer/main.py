@@ -573,6 +573,9 @@ class Neodeemer(MDApp):
         Clock.schedule_once(self.loading.dismiss)
     
     def watchdog_progress(self):
+        if len(self.unavailable_tracks) > 0:
+            self.unavailable_tracks = []
+            self.toolbar.left_action_items = []
         for track in self.playlist_queue:
             Download(track, self.s, self.download_queue_info, False).playlist_file_save()
         while self.download_queue_info["position"] != len(self.download_queue):
