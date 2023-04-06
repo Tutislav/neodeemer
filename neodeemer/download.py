@@ -1,6 +1,7 @@
+import json
 import os
 from html.parser import HTMLParser
-from time import sleep
+from time import sleep, time
 from urllib import request
 
 import music_tag
@@ -115,10 +116,13 @@ class Download():
             self.download_queue_info["position"] += 1
             self.playlist_file_save()
 
-    def download_file(self, url, file_path):
+    def download_file(self, url, file_path, use_headers=True):
         with open(file_path, "wb") as file:
-            response = requests.get(url, headers=HEADERS, stream=True)
-            if response.status_code != 200:
+            if use_headers:
+                response = requests.get(url, headers=HEADERS, stream=True)
+            else:
+                response = requests.get(url, stream=True)
+            if response.status_code != 200 or len(response.content) == 0:
                 raise
             self.total_b_add(len(response.content))
             for data in response.iter_content(4096):
@@ -168,8 +172,28 @@ class Download():
             d.delete_broken_files()
             del d
         self.track_dict["state"] = TrackStates.DOWNLOADING
-        self.download_file(mp3_url, self.track_dict["file_path2"])
+        self.download_file(mp3_url, self.track_dict["file_path2"], False)
         self.track_dict["state"] = TrackStates.SAVED
+
+    def download_mp3_apiyoutubecc(self):
+        status = "Checking..."
+        attempt = 0
+        while status == "Checking..." and attempt < 5:
+            timestamp = str(int(time()))
+            info_url = "https://apiyoutube.cc/check.php?callback=jQuery3410030787610804039245_" + timestamp + "&v=" + self.track_dict["video_id"] + "&_=" + timestamp
+            response = requests.get(info_url, headers=HEADERS)
+            info = json.loads(response.text[30 + len(timestamp):-1])
+            status = info["title"]
+            attempt += 1
+            if attempt >= 5:
+                raise
+            else:
+                sleep(0.5)
+        if status != "Checking...":
+            mp3_url = "https://apiyoutube.cc/192/" + info["hash"] + "::" + info["user"]
+            self.track_dict["state"] = TrackStates.DOWNLOADING
+            self.download_file(mp3_url, self.track_dict["file_path2"])
+            self.track_dict["state"] = TrackStates.SAVED
 
     def download_mp3_vevioz(self):
         class Mp3UrlParser(HTMLParser):
@@ -230,15 +254,19 @@ class Download():
                     except:
                         try:
                             self.delete_broken_files()
-                            self.download_mp3_vevioz()
+                            self.download_mp3_apiyoutubecc()
                         except:
-                            self.delete_broken_files()
-                            if self.spotifyloader.format_mp3:
-                                self.track_dict["state"] = TrackStates.FOUND
-                                self.track_dict["forcedmp3"] = False
-                            else:
-                                self.track_dict["state"] = TrackStates.UNAVAILABLE
-                                self.track_dict["reason"] = "Error while downloading"
+                            try:
+                                self.delete_broken_files()
+                                self.download_mp3_vevioz()
+                            except:
+                                self.delete_broken_files()
+                                if self.spotifyloader.format_mp3:
+                                    self.track_dict["state"] = TrackStates.FOUND
+                                    self.track_dict["forcedmp3"] = False
+                                else:
+                                    self.track_dict["state"] = TrackStates.UNAVAILABLE
+                                    self.track_dict["reason"] = "Error while downloading"
             if self.track_dict["state"] == TrackStates.SAVED:
                 self.save_tags()
             if self.download_attempt >= 5:
