@@ -189,16 +189,18 @@ def contains_date(text, compare_text=None):
         for date in dates:
             for date_format in date_formats:
                 try:
-                    datetime.strptime(date, date_format)
-                    contains = True
-                    break
+                    parsed_date = datetime.strptime(date, date_format)
+                    if parsed_date <= datetime.now():
+                        contains = True
+                        break
                 except:
                     continue
             if compare_text != None:
                 try:
-                    datetime.strptime(date, "%Y")
+                    parsed_date = datetime.strptime(date, "%Y")
                     if not date in compare_text:
-                        contains = True
+                        if parsed_date <= datetime.now():
+                            contains = True
                 except:
                     pass
         return contains, dates[0]
