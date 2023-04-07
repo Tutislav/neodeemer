@@ -495,9 +495,18 @@ class YoutubeLoader(Base):
     def tracks_search(self, track_name):
         list = []
         if len(track_name) > 0:
-            tracks = YoutubeSearch(track_name).to_dict()
-            for track in tracks:
-                list.append(self.track_to_dict(track))
+            try:
+                if "youtube.com" in track_name or "youtu.be" in track_name:
+                    with YoutubeDL() as ydl:
+                        track = ydl.extract_info(track_name, False)
+                        track["channel"] = track["uploader"]
+                        list.append(self.track_to_dict(track))
+                else:
+                    tracks = YoutubeSearch(track_name).to_dict()
+                    for track in tracks:
+                        list.append(self.track_to_dict(track))
+            except:
+                pass
         return list
     
     def playlist_tracks(self, playlist_url):
