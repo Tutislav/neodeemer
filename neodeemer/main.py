@@ -39,7 +39,7 @@ from songinfoloader import SpotifyLoader, YoutubeLoader
 from tools import (TrackStates, check_update_available, open_url, submit_bugs,
                    check_mp3_available)
 
-__version__ = "0.5"
+__version__ = "0.6"
 
 class Loading(MDFloatLayout):
     pass
