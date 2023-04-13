@@ -1,21 +1,29 @@
 [<img src="neodeemer/data/icon.png" alt="Icon" height="100" align="right">](https://github.com/Tutislav/neodeemer/releases/latest)
 
 # Neodeemer
-[![GitHub all releases](https://img.shields.io/github/downloads/Tutislav/neodeemer/total)](https://github.com/Tutislav/neodeemer/releases/latest)
-[![GitHub release (latest by date)](https://img.shields.io/github/v/release/Tutislav/neodeemer)](https://github.com/Tutislav/neodeemer/releases/latest)
-[![GitHub](https://img.shields.io/github/license/Tutislav/neodeemer)](https://github.com/Tutislav/neodeemer/blob/main/LICENSE)
+[![Downloads](https://img.shields.io/github/downloads/Tutislav/neodeemer/total?label=Downloads)](https://github.com/Tutislav/neodeemer/releases/latest)
+[![Release](https://img.shields.io/github/v/release/Tutislav/neodeemer?label=Release)](https://github.com/Tutislav/neodeemer/releases/latest)
+[![License](https://img.shields.io/github/license/Tutislav/neodeemer?label=License)](https://github.com/Tutislav/neodeemer/blob/main/LICENSE)
+[![Softpedia](https://img.shields.io/badge/Softpedia-Certified-limegreen)](https://www.softpedia.com/get/Internet/Download-Managers/Neodeemer.shtml#status)\
+[![Android](https://img.shields.io/badge/Android-%3E%3D%205.0-mediumseagreen?logo=android&logoColor=mediumseagreen)](#installation)
+[![Windows](https://img.shields.io/badge/Windows-%3E%3D%208-deepskyblue?logo=windows&logoColor=deepskyblue)](#installation)
+[![Python](https://img.shields.io/badge/Python-%3E%3D%203.8-steelblue?logo=python&logoColor=steelblue)](#running-from-source)
 
-Multiplatform music downloader with option to download whole albums and Spotify/YouTube playlists.\
-Available on **Android**, **Windows** and [**Linux***](#running-from-source "You must run it from source").
+Spotify/YouTube song downloader with option to download whole albums, playlists and also lyrics.\
+Available on [**Android**](#installation), [**Windows**](#installation) and [**Linux***](#running-from-source "You must run it from source").
 
 ## **[▶Download latest release◀](https://github.com/Tutislav/neodeemer/releases/latest)**
 
 ## Features
-- Search music on Spotify/YouTube
+- Spotify/YouTube search - you can search by artist, album or track name
 - Play songs before you download it
 - Download single songs or whole albums
-- Download whole Spotify/YouTube playlist with `.m3u` file
-- It will automatically save track name, artist name, album image and other tags to songs (only Spotify)
+- Download whole Spotify/YouTube playlists - saved to `.m3u` file
+- Download songs from share screen - tap share in Spotify/YouTube app on Android
+- Automatically save track name, artist name, album image and other tags to songs
+- Lyrics - embedded directly to audio files
+- Synchronized lyrics - saved to `.lrc` files
+- Change audio format - `m4a` or `mp3`
 
 ## Screenshots
 <picture>
@@ -34,6 +42,16 @@ Available on **Android**, **Windows** and [**Linux***](#running-from-source "You
     <source media="(prefers-color-scheme: light)" srcset="img/neodeemer_screenshot_4_light.jpg">
     <img src="img/neodeemer_screenshot_4.jpg" alt="Screenshot 4">
 </picture>
+
+## Installation
+### Android
+1. [Download neodeemer_android.apk](https://github.com/Tutislav/neodeemer/releases/latest)
+2. Open downloaded apk and install it
+
+If it says you can't install unknown apps, just go to Settings and search Install unknown apps, then select your browser and tap Allow from this source.
+### Windows
+1. [Download neodeemer_windows.exe](https://github.com/Tutislav/neodeemer/releases/latest)
+2. Just open the downloaded exe (It doesn't require installation)
 
 ## Running from source
 1. Install Python 3.8.10 or later if you don't have it already
@@ -80,6 +98,7 @@ If you have other issue or some idea to make the app better, just open a new iss
 - [ytmusicapi](https://github.com/sigma67/ytmusicapi)
 - [pytube](https://github.com/pytube/pytube)
 - [yt-dlp](https://github.com/yt-dlp/yt-dlp)
+- [Spotify Lyrics API](https://github.com/akashrchandran/spotify-lyrics-api)
 - [music-tag](https://github.com/KristoforMaynard/music-tag)
 - [FFPyPlayer](https://github.com/matham/ffpyplayer)
 - [Plyer](https://github.com/kivy/plyer)
