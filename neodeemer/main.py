@@ -186,9 +186,14 @@ class Neodeemer(MDApp):
         )
         if self.intent_url != "":
             if "youtube.com" in self.intent_url or "youtu.be" in self.intent_url:
-                tracks = self.y.tracks_search(self.intent_url)
-                if len(tracks) > 0:
-                    self.download([tracks[0]])
+                if "playlist" in self.intent_url:
+                    self.screen_switch("YPlaylistScreen")
+                    self.text_playlist_last.text = self.intent_url
+                    self.load_in_thread(self.playlist_load, self.tracks_actions_show, load_arg=True, show_arg=True, show_arg2=True)
+                else:
+                    tracks = self.y.tracks_search(self.intent_url)
+                    if len(tracks) > 0:
+                        self.download([tracks[0]])
             elif "spotify.com" in self.intent_url:
                 intent_parts = self.intent_url.split("/")
                 spotify_id = intent_parts[len(intent_parts) - 1]
