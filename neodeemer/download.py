@@ -103,7 +103,7 @@ class Download():
                     if self.synchronized_lyrics:
                         lyrics = self.lyrics.find_lyrics(self.track_dict, self.synchronized_lyrics)
                         if lyrics != "":
-                            lrc_file_path = file_path[:-4] + ".lrc"
+                            lrc_file_path = os.path.splitext(file_path)[0] + ".lrc"
                             with open(lrc_file_path, "w", encoding="utf-8") as lrc_file:
                                 lrc_file.write(lyrics)
                 except:
@@ -131,7 +131,7 @@ class Download():
 
     def download_m4a_youtube_dl(self):
         video_url = "https://youtu.be/" + self.track_dict["video_id"]
-        file_path_without_ext = self.track_dict["file_path"][:-4]
+        file_path_without_ext = os.path.splitext(self.track_dict["file_path"])[0]
         params = {
             "format": "m4a/bestaudio",
             "outtmpl": file_path_without_ext + ".%(ext)s",
