@@ -149,6 +149,8 @@ class Neodeemer(MDApp):
             self.on_new_intent(self.intent)
             activity.bind(on_new_intent=self.on_new_intent)
         else:
+            from kivy.config import Config
+            Config.set("input", "mouse", "mouse,multitouch_on_demand")
             try:
                 self.music_folder_path
             except:
