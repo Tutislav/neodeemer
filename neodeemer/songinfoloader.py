@@ -285,7 +285,8 @@ class SpotifyLoader(Base):
         excluded_words = self.ytsfilter["excluded_words"]
         artist_name2 = norm(track_dict["artist_name"])
         album_name2 = norm(track_dict["album_name"])
-        track_name2 = norm(clean_track_name(track_dict["track_name"]))
+        track_name2 = norm(track_dict["track_name"])
+        track_name3 = clean_track_name(track_name2)
         track_duration_s = track_dict["track_duration_ms"] / 1000
         max_results = 5
         text = track_dict["artist_name"] + " " + track_dict["track_name"]
@@ -299,7 +300,7 @@ class SpotifyLoader(Base):
                         track_artist = norm(track["artists"][0]["name"])
                         track_name = norm(track["title"])
                         if contains_artist_track(track_artist, artist_name2):
-                            if contains_artist_track(track_name, track_name=track_name2):
+                            if contains_artist_track(track_name, track_name=track_name3):
                                 contains_excluded = False
                                 for word in excluded_words:
                                     if word in track_name and not word in track_name2:
@@ -322,7 +323,7 @@ class SpotifyLoader(Base):
                                 tracks = album2["tracks"]
                                 for track in tracks:
                                     track_name = norm(track["title"])
-                                    if contains_artist_track(track_name, track_name=track_name2):
+                                    if contains_artist_track(track_name, track_name=track_name3):
                                         contains_excluded = False
                                         for word in excluded_words:
                                             if word in track_name and not word in track_name2:
@@ -365,10 +366,10 @@ class SpotifyLoader(Base):
                     self.video_get_details(video)
                     video_description = video["video_description"]
                     video_details = video["video_details"]
-                    if contains_artist_track(video_title, artist_name2, track_name2) or contains_artist_track(video_channel, artist_name2) or contains_artist_track(video_description, artist_name2):
-                        if contains_artist_track(video_title, track_name=track_name2):
+                    if contains_artist_track(video_title, artist_name2, track_name3) or contains_artist_track(video_channel, artist_name2) or contains_artist_track(video_description, artist_name2):
+                        if contains_artist_track(video_title, track_name=track_name3):
                             priority = 5
-                            if track_name2 == artist_name2:
+                            if track_name3 == artist_name2:
                                 if not video_title.count(artist_name2) == 2:
                                     priority += options["not_same_name_penalization"]
                             if contains_date(video["title"], track_name2)[0]:
@@ -455,11 +456,21 @@ class YoutubeLoader(Base):
             video_id = track["id"]
             video_channel = track["channel"]
         else:
-            track_name = track.title
-            track_duration_ms = track.length * 1000
-            track_duration_str = mstostr(track.length * 1000)
-            video_id = track.video_id
-            video_channel = track.author
+            try:
+                track_name = track.title
+                track_duration_ms = track.length * 1000
+                track_duration_str = mstostr(track.length * 1000)
+                video_id = track.video_id
+                video_channel = track.author
+            except:
+                video_url = "https://youtu.be/" + track.video_id
+                with YoutubeDL() as ydl:
+                    video_info = ydl.extract_info(video_url, False)
+                    track_name = video_info["title"]
+                    track_duration_ms = video_info["duration"] * 1000
+                    track_duration_str = mstostr(video_info["duration"] * 1000)
+                    video_id = track.video_id
+                    video_channel = video_info["uploader"]
         file_path = os.path.join(self.music_folder_path, norm(track_name, True, True) + ".m4a")
         file_path2 = os.path.join(self.music_folder_path, norm(track_name, True, True) + ".mp3")
         track_dict = {
