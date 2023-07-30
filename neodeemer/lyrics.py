@@ -256,7 +256,7 @@ class Lyricsify():
     def __init__(self):
         self.searchparser = self.SearchParser()
         self.lyricsparser = self.LyricsParser()
-        self.search_url = "https://www.lyricsify.com/search?q="
+        self.search_url = "https://www.lyricsify.com/lyrics/"
 
     def search(self, q: str):
         q = parse.quote_plus(q)

@@ -21,9 +21,9 @@ class TestLyrics(unittest.TestCase):
     tracks = [
         { "name": "HIM Wicked Game", "track_dict": None, "karaoketexty": 1136, "musixmatch": 1299, "lyricsify": 1903, "spotifylyricsapi": 1787 },
         { "name": "Depeche Mode Enjoy the Silence", "track_dict": None, "karaoketexty": 732, "musixmatch": 735, "lyricsify": 771, "spotifylyricsapi": 1059 },
-        { "name": "My Chemical Romance Teenagers", "track_dict": None, "karaoketexty": 1615, "musixmatch": 1601, "lyricsify": 1535, "spotifylyricsapi": 2079 },
+        { "name": "My Chemical Romance Teenagers", "track_dict": None, "karaoketexty": 1615, "musixmatch": 1601, "lyricsify": 1598, "spotifylyricsapi": 2079 },
         { "name": "Smash Mouth All Star", "track_dict": None, "karaoketexty": 2076, "musixmatch": 2250, "lyricsify": 3541, "spotifylyricsapi": 2990 },
-        { "name": "Journey Dont Stop Believin", "track_dict": None, "karaoketexty": 1067, "musixmatch": 1046, "lyricsify": 1211, "spotifylyricsapi": 1547 }
+        { "name": "Journey Dont Stop Believin", "track_dict": None, "karaoketexty": 1067, "musixmatch": 1046, "lyricsify": 1211, "spotifylyricsapi": 1573 }
     ]
 
     def test_a_spotifysearch(self):
