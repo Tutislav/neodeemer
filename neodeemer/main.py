@@ -38,6 +38,7 @@ from localization import Localization
 from songinfoloader import SpotifyLoader, YoutubeLoader
 from tools import (TrackStates, check_update_available, open_url, submit_bugs,
                    check_mp3_available)
+from webapi import WebApiServer
 
 __version__ = "0.6"
 
@@ -102,6 +103,7 @@ class Neodeemer(MDApp):
     create_subfolders = True
     save_lyrics = True
     synchronized_lyrics = False
+    webapi_enabled = False
     selected_tracks = []
     download_queue = []
     download_queue_info = {
@@ -174,6 +176,11 @@ class Neodeemer(MDApp):
         self.play_track = Thread()
         for i in range(1, self.download_threads_count + 1):
             globals()[f"download_tracks_{i}"] = Thread()
+        self.webapi_watchdog = Thread()
+        if self.webapi_enabled and not self.webapi_watchdog.is_alive():
+            self.webapi_server = WebApiServer()
+            self.webapi_watchdog = Thread(target=self.watchdog_webapi, name="webapi_watchdog")
+            self.webapi_watchdog.start()
         self.navigation_menu_list = self.root.ids.navigation_menu_list
         if check_update_available(__version__):
             line = TwoLineIconListItem(text=self.loc.get("Update"), secondary_text=self.loc.get("New version is available"), on_press=lambda x:open_url("https://github.com/Tutislav/neodeemer/releases/latest", platform))
@@ -186,41 +193,11 @@ class Neodeemer(MDApp):
                 MDFlatButton(text=self.loc.get("Cancel"), on_press=lambda x:self.submit_bug_dialog.dismiss())
             ]
         )
-        if self.intent_url != "":
-            if "youtube.com" in self.intent_url or "youtu.be" in self.intent_url:
-                if "playlist" in self.intent_url:
-                    self.screen_switch("YPlaylistScreen")
-                    self.text_playlist_last.text = self.intent_url
-                    self.load_in_thread(self.playlist_load, self.tracks_actions_show, load_arg=True, show_arg=True, show_arg2=True)
-                else:
-                    tracks = self.y.tracks_search(self.intent_url)
-                    if len(tracks) > 0:
-                        self.download([tracks[0]])
-            elif "spotify.com" in self.intent_url:
-                intent_parts = self.intent_url.split("/")
-                spotify_id = intent_parts[len(intent_parts) - 1]
-                if "?" in spotify_id:
-                    spotify_id = spotify_id.split("?")[0]
-                if "/artist/" in self.intent_url:
-                    artist = self.s.artist(spotify_id)
-                    if artist != None:
-                        self.tab_switch(self.albums_tab)
-                        self.load_in_thread(self.albums_load, self.albums_show, artist)
-                elif "/album/" in self.intent_url:
-                    album = self.s.album(spotify_id)
-                    if album != None:
-                        self.tab_switch(self.tracks_tab)
-                        self.load_in_thread(self.tracks_load, self.tracks_show, album)
-                elif "/track/" in self.intent_url:
-                    track = self.s.track(spotify_id)
-                    if track != None:
-                        self.download([track])
-                elif "/playlist/" in self.intent_url:
-                    self.screen_switch("SPlaylistScreen")
-                    self.text_playlist_last.text = spotify_id
-                    self.load_in_thread(self.playlist_load, self.tracks_actions_show, show_arg=True, show_arg2=True)
-            self.intent_url = ""
+        self.handle_intent()
     
+    def on_stop(self):
+        os.kill(os.getpid(), 9)
+
     def screen_switch(self, screen_name, direction="left"):
         if not self.screen_manager.has_screen(screen_name):
             Builder.load_file(screen_name.lower() + ".kv")
@@ -244,6 +221,7 @@ class Neodeemer(MDApp):
                     self.switch_save_lyrics = screen.ids.switch_save_lyrics
                     self.options_lyrics = screen.ids.options_lyrics
                     self.switch_lyrics_type = screen.ids.switch_lyrics_type
+                    self.switch_webapi_enabled = screen.ids.switch_webapi_enabled
                     self.text_localization = screen.ids.text_localization
                     self.localization_menu_list = [
                         {
@@ -289,6 +267,42 @@ class Neodeemer(MDApp):
                 text = intent.getStringExtra(self.IntentClass.EXTRA_TEXT)
                 self.intent_url = text
 
+    def handle_intent(self, *args):
+        if self.intent_url != "":
+            if "youtube.com" in self.intent_url or "youtu.be" in self.intent_url:
+                if "playlist" in self.intent_url:
+                    self.screen_switch("YPlaylistScreen")
+                    self.text_playlist_last.text = self.intent_url
+                    self.load_in_thread(self.playlist_load, self.tracks_actions_show, load_arg=True, show_arg=True, show_arg2=True)
+                else:
+                    tracks = self.y.tracks_search(self.intent_url)
+                    if len(tracks) > 0:
+                        self.download([tracks[0]])
+            elif "spotify.com" in self.intent_url:
+                intent_parts = self.intent_url.split("/")
+                spotify_id = intent_parts[len(intent_parts) - 1]
+                if "?" in spotify_id:
+                    spotify_id = spotify_id.split("?")[0]
+                if "/artist/" in self.intent_url:
+                    artist = self.s.artist(spotify_id)
+                    if artist != None:
+                        self.tab_switch(self.albums_tab)
+                        self.load_in_thread(self.albums_load, self.albums_show, artist)
+                elif "/album/" in self.intent_url:
+                    album = self.s.album(spotify_id)
+                    if album != None:
+                        self.tab_switch(self.tracks_tab)
+                        self.load_in_thread(self.tracks_load, self.tracks_show, album)
+                elif "/track/" in self.intent_url:
+                    track = self.s.track(spotify_id)
+                    if track != None:
+                        self.download([track])
+                elif "/playlist/" in self.intent_url:
+                    self.screen_switch("SPlaylistScreen")
+                    self.text_playlist_last.text = spotify_id
+                    self.load_in_thread(self.playlist_load, self.tracks_actions_show, show_arg=True, show_arg2=True)
+            self.intent_url = ""
+    
     def artists_load(self):
         text = self.artists_tab.ids.text_artists_search.text
         artists = self.s.artists_search(text)
@@ -486,11 +500,12 @@ class Neodeemer(MDApp):
             else:
                 self.playlist_queue.append(track)
         self.selected_tracks = []
-        if self.screen_cur.name == "SpotifyScreen":
-            mdlist_tracks = self.tracks_tab.ids.mdlist_tracks
-        else:
-            mdlist_tracks = self.screen_cur.ids.mdlist_tracks
-        self.mdlist_set_mode(mdlist_tracks, 0)
+        if self.screen_cur.name != "SettingsScreen":
+            if self.screen_cur.name == "SpotifyScreen":
+                mdlist_tracks = self.tracks_tab.ids.mdlist_tracks
+            else:
+                mdlist_tracks = self.screen_cur.ids.mdlist_tracks
+            self.mdlist_set_mode(mdlist_tracks, 0)
         for i in range(1, self.download_threads_count + 1):
             if not globals()[f"download_tracks_{i}"].is_alive():
                 globals()[f"download_tracks_{i}"] = Thread(target=self.download_tracks_from_queue, name=f"download_tracks_{i}")
@@ -610,6 +625,15 @@ class Neodeemer(MDApp):
             icon_path = resource_find("data/icon.png")
         notification.notify(title=self.loc.get("Download completed"), message=message, app_name=self.loc.TITLE, app_icon=icon_path)
     
+    def watchdog_webapi(self):
+        while self.webapi_enabled or self.webapi_server.server_thread.is_alive():
+            if self.webapi_server.intent_url != "":
+                self.intent_url = self.webapi_server.intent_url
+                self.webapi_server.intent_url = ""
+            if self.intent_url != "":
+                Clock.schedule_once(self.handle_intent)
+            sleep(0.5)
+
     def progressbar_update(self, *args):
         if self.download_queue_info["total_b"] > 0:
             if len(self.download_queue) <= 10:
@@ -799,6 +823,14 @@ class Neodeemer(MDApp):
         self.synchronized_lyrics = self.switch_lyrics_type.active
         self.settings_save()
     
+    def webapi_enabled_change(self):
+        self.webapi_enabled = self.switch_webapi_enabled.active
+        if self.webapi_enabled and not self.webapi_watchdog.is_alive():
+            self.webapi_server = WebApiServer()
+            self.webapi_watchdog = Thread(target=self.watchdog_webapi, name="webapi_watchdog")
+            self.webapi_watchdog.start()
+        self.settings_save()
+
     def theme_toggle(self):
         if self.theme_cls.theme_style == "Light":
             self.theme_cls.theme_style = "Dark"
@@ -837,6 +869,8 @@ class Neodeemer(MDApp):
                     self.save_lyrics = data["save_lyrics"]
                 if "synchronized_lyrics" in data:
                     self.synchronized_lyrics = data["synchronized_lyrics"]
+                if "webapi_enabled" in data:
+                    self.webapi_enabled = data["webapi_enabled"]
                 self.theme_cls.theme_style = data["theme"]
                 self.loc.set_lang(data["lang"])
                 if "playlist_last" in data:
@@ -852,6 +886,7 @@ class Neodeemer(MDApp):
                 "create_subfolders": self.create_subfolders,
                 "save_lyrics": self.save_lyrics,
                 "synchronized_lyrics": self.synchronized_lyrics,
+                "webapi_enabled": self.webapi_enabled,
                 "theme": self.theme_cls.theme_style,
                 "lang": self.loc.get_lang(),
                 "playlist_last": self.playlist_last

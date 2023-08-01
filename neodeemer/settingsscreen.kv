@@ -111,6 +111,24 @@
                     MDLabel:
                         text: app.loc.get("Synchronized lyrics")
 
+                MDGridLayout:
+                    cols: 4
+                    adaptive_height: True
+                    spacing: 15
+    
+                    MDLabel:
+                        text: app.loc.get("Enable WebApi")
+                    
+                    MDBoxLayout:
+                    
+                    MDSwitch:
+                        id: switch_webapi_enabled
+                        active: app.webapi_enabled
+                        width: dp(64)
+                        on_active: app.webapi_enabled_change()
+
+                    MDBoxLayout:
+
                 MDFillRoundFlatIconButton:
                     text: app.loc.get("Toggle theme")
                     icon: "theme-light-dark"

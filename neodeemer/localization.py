@@ -51,6 +51,7 @@ CZ = {
     "Download lyrics": "Stahovat texty",
     "Unsynchronized lyrics": "Nesynchronizované texty",
     "Synchronized lyrics": "Synchronizované texty",
+    "Enable WebApi": "Povolit WebApi",
     "Create subfolders": "Vytvářet podsložky",
     "Music folder": "Složka, do které se ukládá hudba",
     "Choose folder": "Vybrat složku",
