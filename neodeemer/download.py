@@ -1,7 +1,4 @@
-import json
 import os
-from html.parser import HTMLParser
-from time import sleep, time
 from urllib import request
 
 import music_tag
@@ -11,7 +8,7 @@ from yt_dlp import YoutubeDL
 
 from lyrics import Lyrics
 from songinfoloader import SpotifyLoader
-from tools import HEADERS, TrackStates, check_mp3_available
+from tools import HEADERS, TrackStates
 
 
 class Download():
@@ -116,12 +113,13 @@ class Download():
             self.download_queue_info["position"] += 1
             self.playlist_file_save()
 
-    def download_file(self, url, file_path, use_headers=True):
+    def download_file(self, url, file_path, use_headers=True, response=None):
         with open(file_path, "wb") as file:
-            if use_headers:
-                response = requests.get(url, headers=HEADERS, stream=True)
-            else:
-                response = requests.get(url, stream=True)
+            if response == None:
+                if use_headers:
+                    response = requests.get(url, headers=HEADERS, stream=True)
+                else:
+                    response = requests.get(url, stream=True)
             if response.status_code != 200 or len(response.content) == 0:
                 raise
             self.total_b_add(len(response.content))
@@ -160,66 +158,17 @@ class Download():
         self.track_dict["state"] = TrackStates.SAVED
     
     def download_mp3_neodeemer(self):
-        mp3_url = "https://neodeemer.vorpal.tk/mp3.php?video_id=" + self.track_dict["video_id"]
-        if not check_mp3_available(self.track_dict):
-            track_dict_temp = {}
-            track_dict_temp.update(self.track_dict)
-            track_dict_temp["forcedmp3"] = False
-            d = Download(track_dict_temp, self.spotifyloader, None, False)
-            d.download_track()
-            with open(track_dict_temp["file_path"], "rb") as input_file:
-                requests.post(mp3_url, files={"input_file": input_file})
-            d.delete_broken_files()
-            del d
+        track_dict_temp = {}
+        track_dict_temp.update(self.track_dict)
+        track_dict_temp["forcedmp3"] = False
+        d = Download(track_dict_temp, self.spotifyloader, None, False)
+        d.download_track()
+        with open(track_dict_temp["file_path"], "rb") as input_file:
+            response = requests.post("https://neodeemer.vorpal.tk/converttomp3.php", files={"input_file": input_file}, stream=True)
+        d.delete_broken_files()
+        del d
         self.track_dict["state"] = TrackStates.DOWNLOADING
-        self.download_file(mp3_url, self.track_dict["file_path2"], False)
-        self.track_dict["state"] = TrackStates.SAVED
-
-    def download_mp3_apiyoutubecc(self):
-        status = "Checking..."
-        attempt = 0
-        while status == "Checking..." and attempt < 5:
-            timestamp = str(int(time()))
-            info_url = "https://apiyoutube.cc/check.php?callback=jQuery3410030787610804039245_" + timestamp + "&v=" + self.track_dict["video_id"] + "&_=" + timestamp
-            response = requests.get(info_url, headers=HEADERS)
-            info = json.loads(response.text[30 + len(timestamp):-1])
-            status = info["title"]
-            attempt += 1
-            if attempt >= 5:
-                raise
-            else:
-                sleep(0.5)
-        if status != "Checking...":
-            mp3_url = "https://apiyoutube.cc/192/" + info["hash"] + "::" + info["user"]
-            self.track_dict["state"] = TrackStates.DOWNLOADING
-            self.download_file(mp3_url, self.track_dict["file_path2"])
-            self.track_dict["state"] = TrackStates.SAVED
-
-    def download_mp3_vevioz(self):
-        class Mp3UrlParser(HTMLParser):
-            list = []
-            def handle_starttag(self, tag, attrs):
-                if tag == "a":
-                    for name, value in attrs:
-                        if name == "href":
-                            self.list.append(value)
-            def to_list(self):
-                return self.list
-        url = "https://api.vevioz.com/@api/button/mp3/" + self.track_dict["video_id"]
-        response = requests.get(url, headers=HEADERS)
-        if response.status_code != 200:
-            raise
-        mp3urlparser = Mp3UrlParser()
-        mp3urlparser.feed(response.text)
-        parser_attempt = 0
-        while len(mp3urlparser.to_list()) == 0:
-            parser_attempt += 1
-            if parser_attempt >= 5:
-                raise
-            sleep(0.5)
-        mp3_url = mp3urlparser.to_list()[2]
-        self.track_dict["state"] = TrackStates.DOWNLOADING
-        self.download_file(mp3_url, self.track_dict["file_path2"])
+        self.download_file("", self.track_dict["file_path2"], False, response)
         self.track_dict["state"] = TrackStates.SAVED
     
     def download_track(self):
@@ -252,21 +201,13 @@ class Download():
                         self.delete_broken_files()
                         self.download_mp3_neodeemer()
                     except:
-                        try:
-                            self.delete_broken_files()
-                            self.download_mp3_apiyoutubecc()
-                        except:
-                            try:
-                                self.delete_broken_files()
-                                self.download_mp3_vevioz()
-                            except:
-                                self.delete_broken_files()
-                                if self.spotifyloader.format_mp3:
-                                    self.track_dict["state"] = TrackStates.FOUND
-                                    self.track_dict["forcedmp3"] = False
-                                else:
-                                    self.track_dict["state"] = TrackStates.UNAVAILABLE
-                                    self.track_dict["reason"] = "Error while downloading"
+                        self.delete_broken_files()
+                        if self.spotifyloader.format_mp3:
+                            self.track_dict["state"] = TrackStates.FOUND
+                            self.track_dict["forcedmp3"] = False
+                        else:
+                            self.track_dict["state"] = TrackStates.UNAVAILABLE
+                            self.track_dict["reason"] = "Error while downloading"
             if self.track_dict["state"] == TrackStates.SAVED:
                 self.save_tags()
             if self.download_attempt >= 5:

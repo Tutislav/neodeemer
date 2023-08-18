@@ -48,6 +48,8 @@ CZ = {
     "Show": "Zobrazit",
     #SettingsScreen
     "Format": "Formát",
+    "(Better quality)": "(Lepší kvalita)",
+    "(Slower download)": "(Pomalejší stahování)",
     "Download lyrics": "Stahovat texty",
     "Unsynchronized lyrics": "Nesynchronizované texty",
     "Synchronized lyrics": "Synchronizované texty",
