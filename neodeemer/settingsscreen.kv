@@ -26,7 +26,7 @@
                 MDGridLayout:
                     cols: 4
                     adaptive_height: True
-                    spacing: 15
+                    spacing: 15, 0
 
                     MDLabel:
                         text: app.loc.get("Format")
@@ -52,7 +52,9 @@
                         font_style: "Caption"
                         theme_text_color: "Hint"
 
-                    MDBoxLayout:
+                    MDSwitch:
+                        width: dp(64)
+                        opacity: 0
 
                     MDLabel:
                         text: app.loc.get("(Slower download)")
