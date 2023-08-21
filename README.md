@@ -24,6 +24,7 @@ Available on [**Android**](#installation), [**Windows**](#installation) and [**L
 - Lyrics - embedded directly to audio files
 - Synchronized lyrics - saved to `.lrc` files
 - Change audio format - `m4a` or `mp3`
+- [Browser Extension](#browser-extension) - download music directly from YouTube video page
 
 ## Screenshots
 <picture>
@@ -58,14 +59,14 @@ If it says you can't install unknown apps, just go to Settings and search Instal
 2. Clone this repo
 3. Get your own [Spotify](https://developer.spotify.com/dashboard/) and [YouTube](https://developers.google.com/youtube/v3/getting-started) API keys
 4. Create `.env` file in `neodeemer\neodeemer` (folder where is main.py) like this:
-    ```
+    ```dotenv
     SPOTIPY_CLIENT_ID=
     SPOTIPY_CLIENT_SECRET=
     YOUTUBE_API_KEY=
     ```
 5. Continue depending on your platform
 ### Windows
-```
+```cmd
 cd neodeemer\neodeemer
 python -m venv venv
 venv\Scripts\activate
@@ -73,13 +74,36 @@ pip install -r requirements.txt
 python main.py
 ```
 ### Linux
-```
+```bash
 cd neodeemer/neodeemer
 python3 -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt
 python3 main.py
 ```
+
+## Browser Extension
+You can install Neodeemer UserScript to download music directly from YouTube video page.
+1. Install [TamperMonkey](https://chrome.google.com/webstore/detail/tampermonkey/dhdgffkkebhmkfjojejmpbldmpobfkfo) to your browser
+2. Install [Neodeemer UserScript](https://raw.githubusercontent.com/Tutislav/neodeemer/main/neodeemer/utils/userscript.user.js)
+3. Start Neodeemer
+4. Enable WebApi in Neodeemeer settings
+5. Go to any YouTube video and click Neodeemer icon under the video, it will add video to download queue
+### Download to different device
+1. Click on TamperMonkey extension
+2. Go to *Control Panel > Installed Scripts > Neodeemer UserScript*
+3. Change `localhost` to `yourdeviceip` on these lines:
+    ```js
+    // @connect         yourdeviceip
+    ```
+    ```js
+    const host = "yourdeviceip";
+    ```
+    where `yourdeviceip` is IP adress of device you want to control (e.g. 192.168.0.123).\
+    You can get your device IP depending on your OS:\
+    Android - *System Settings > Wi-Fi > YourNetwork > IP Address*\
+    Windows - *cmd > ipconfig > IPv4 Address*\
+    Linux - *terminal > ip addr > inet*
 
 ## Issues
 If encounter some tracks, that has bad quality or even doesn't match the name, you can submit it directly in the app using
@@ -91,6 +115,7 @@ icon, when you select track.\
 If you have other issue or some idea to make the app better, just open a new issue on GitHub.
 
 ## Acknowledgments
+This app wouldn't be possible to make without these libraries:
 - [Kivy](https://kivy.org/)
 - [KivyMD](https://github.com/kivymd/KivyMD)
 - [Spotipy](https://github.com/plamere/spotipy)
@@ -106,3 +131,4 @@ If you have other issue or some idea to make the app better, just open a new iss
 - [Requests](https://github.com/psf/requests)
 - [Unidecode](https://github.com/avian2/unidecode)
 - [Certifi](https://github.com/certifi/python-certifi)
+- [TamperMonkey](https://www.tampermonkey.net/)
