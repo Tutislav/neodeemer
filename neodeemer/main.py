@@ -40,7 +40,7 @@ from tools import (TrackStates, check_update_available, open_url, submit_bugs,
                    check_mp3_available)
 from webapi import WebApiServer
 
-__version__ = "0.6"
+__version__ = "0.7"
 
 class Loading(MDFloatLayout):
     pass
