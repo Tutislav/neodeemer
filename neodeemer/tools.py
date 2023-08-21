@@ -91,6 +91,9 @@ def submit_bug(track_dict):
     del track_dict_temp["folder_path"]
     del track_dict_temp["file_path"]
     del track_dict_temp["file_path2"]
+    if "playlist_name" in track_dict_temp:
+        del track_dict_temp["playlist_name"]
+        del track_dict_temp["playlist_file_path"]
     try:
         form_url = "https://docs.google.com/forms/d/e/1FAIpQLSfedpb4aVpMSyzjKMgmkQ1RZ9myBlMPpwo0OvVdpKrxd9nkvQ/formResponse"
         form_data = {
