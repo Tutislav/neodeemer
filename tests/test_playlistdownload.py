@@ -40,7 +40,7 @@ class TestPlaylistDownload(unittest.TestCase):
     def test_d_download(self):
         for track in self.tracks:
             Download(track, self.s, None).download_track()
-            self.assertEqual(track_file_state(track).value, TrackStates.COMPLETED.value)
+            self.assertEqual(track_file_state(track).value, TrackStates.COMPLETED.value, "Download error: " + str(track))
 
     def test_e_splaylist_file(self):
         with open(self.tracks[0]["playlist_file_path"], "r", encoding="utf-8") as playlist_file:

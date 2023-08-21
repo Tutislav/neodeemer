@@ -46,7 +46,7 @@ class TestSearchDownload(unittest.TestCase):
     def test_d_download_m4a(self):
         for track in self.tracks:
             Download(track, self.s, None).download_track()
-            self.assertEqual(track_file_state(track).value, TrackStates.COMPLETED.value)
+            self.assertEqual(track_file_state(track).value, TrackStates.COMPLETED.value, "Download m4a error: " + str(track))
 
     def test_e_cleanup(self):
         shutil.rmtree(self.music_folder_path)
@@ -54,7 +54,7 @@ class TestSearchDownload(unittest.TestCase):
     def test_f_download_mp3(self):
         for track in self.tracks2:
             Download(track, self.s, None).download_track()
-            self.assertEqual(track_file_state(track).value, TrackStates.COMPLETED.value)
+            self.assertEqual(track_file_state(track).value, TrackStates.COMPLETED.value, "Download mp3 error: " + str(track))
 
     def test_z_cleanup(self):
         shutil.rmtree(self.music_folder_path)
