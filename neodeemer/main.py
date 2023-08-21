@@ -193,7 +193,8 @@ class Neodeemer(MDApp):
                 MDFlatButton(text=self.loc.get("Cancel"), on_press=lambda x:self.submit_bug_dialog.dismiss())
             ]
         )
-        self.handle_intent()
+        self.handle_intent(self.intent_url)
+        self.intent_url = ""
     
     def on_stop(self):
         os.kill(os.getpid(), 9)
@@ -267,41 +268,40 @@ class Neodeemer(MDApp):
                 text = intent.getStringExtra(self.IntentClass.EXTRA_TEXT)
                 self.intent_url = text
 
-    def handle_intent(self, *args):
-        if self.intent_url != "":
-            if "youtube.com" in self.intent_url or "youtu.be" in self.intent_url:
-                if "playlist" in self.intent_url:
+    def handle_intent(self, intent_url="", *args):
+        if intent_url != "":
+            if "youtube.com" in intent_url or "youtu.be" in intent_url:
+                if "playlist" in intent_url:
                     self.screen_switch("YPlaylistScreen")
-                    self.text_playlist_last.text = self.intent_url
+                    self.text_playlist_last.text = intent_url
                     self.load_in_thread(self.playlist_load, self.tracks_actions_show, load_arg=True, show_arg=True, show_arg2=True)
                 else:
-                    tracks = self.y.tracks_search(self.intent_url)
+                    tracks = self.y.tracks_search(intent_url)
                     if len(tracks) > 0:
                         self.download([tracks[0]])
-            elif "spotify.com" in self.intent_url:
-                intent_parts = self.intent_url.split("/")
+            elif "spotify.com" in intent_url:
+                intent_parts = intent_url.split("/")
                 spotify_id = intent_parts[len(intent_parts) - 1]
                 if "?" in spotify_id:
                     spotify_id = spotify_id.split("?")[0]
-                if "/artist/" in self.intent_url:
+                if "/artist/" in intent_url:
                     artist = self.s.artist(spotify_id)
                     if artist != None:
                         self.tab_switch(self.albums_tab)
                         self.load_in_thread(self.albums_load, self.albums_show, artist)
-                elif "/album/" in self.intent_url:
+                elif "/album/" in intent_url:
                     album = self.s.album(spotify_id)
                     if album != None:
                         self.tab_switch(self.tracks_tab)
                         self.load_in_thread(self.tracks_load, self.tracks_show, album)
-                elif "/track/" in self.intent_url:
+                elif "/track/" in intent_url:
                     track = self.s.track(spotify_id)
                     if track != None:
                         self.download([track])
-                elif "/playlist/" in self.intent_url:
+                elif "/playlist/" in intent_url:
                     self.screen_switch("SPlaylistScreen")
                     self.text_playlist_last.text = spotify_id
                     self.load_in_thread(self.playlist_load, self.tracks_actions_show, show_arg=True, show_arg2=True)
-            self.intent_url = ""
     
     def artists_load(self):
         text = self.artists_tab.ids.text_artists_search.text
@@ -626,12 +626,14 @@ class Neodeemer(MDApp):
         notification.notify(title=self.loc.get("Download completed"), message=message, app_name=self.loc.TITLE, app_icon=icon_path)
     
     def watchdog_webapi(self):
+        intent_url = ""
         while self.webapi_enabled or self.webapi_server.server_thread.is_alive():
             if self.webapi_server.intent_url != "":
-                self.intent_url = self.webapi_server.intent_url
+                intent_url = self.webapi_server.intent_url
                 self.webapi_server.intent_url = ""
-            if self.intent_url != "":
-                Clock.schedule_once(self.handle_intent)
+            if intent_url != "":
+                Clock.schedule_once(partial(self.handle_intent, intent_url))
+                intent_url = ""
             sleep(0.5)
 
     def progressbar_update(self, *args):
