@@ -265,3 +265,7 @@ def check_mp3_available(track_dict):
     url = "https://neodeemer.vorpal.tk/mp3.php?video_id=" + track_dict["video_id"] + "&info=1"
     urldata = requests.get(url)
     return bool(int(urldata.text))
+
+def font(text: str):
+    text = "[font=Regular]" + text + "[/font]"
+    return text

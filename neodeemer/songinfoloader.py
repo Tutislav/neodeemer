@@ -12,7 +12,7 @@ from yt_dlp import YoutubeDL
 from youtube_search import YoutubeSearch
 from ytmusicapi import YTMusic
 
-from tools import (TrackStates, clean_track_name, contains_artist_track, contains_date, contains_separate_word, contains_part, mstostr, norm, strtoms,
+from tools import (TrackStates, clean_track_name, contains_artist_track, contains_date, contains_separate_word, contains_part, font, mstostr, norm, strtoms,
                    track_file_state)
 
 
@@ -256,7 +256,7 @@ class SpotifyLoader(Base):
                     })
                     list.append(track_dict)
                     position += 1
-                    self.label_loading_info.text = str(position).rjust(3)
+                    self.label_loading_info.text = font(str(position).rjust(3))
                 self.label_loading_info.text = ""
             except:
                 pass
@@ -537,7 +537,7 @@ class YoutubeLoader(Base):
                     })
                     list.append(track_dict)
                     position += 1
-                    self.label_loading_info.text = str(position).rjust(3)
+                    self.label_loading_info.text = font(str(position).rjust(3))
                 self.label_loading_info.text = ""
             except:
                 pass

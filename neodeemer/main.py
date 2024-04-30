@@ -10,6 +10,7 @@ import certifi
 from kivy.animation import Animation
 from kivy.clock import Clock
 from kivy.core.audio import SoundLoader
+from kivy.core.text import LabelBase
 from kivy.core.window import Window
 from kivy.lang import Builder
 from kivy.metrics import dp
@@ -36,7 +37,7 @@ from plyer import notification
 from download import Download
 from localization import Localization
 from songinfoloader import SpotifyLoader, YoutubeLoader
-from tools import (TrackStates, check_update_available, open_url, submit_bugs,
+from tools import (TrackStates, check_update_available, font, open_url, submit_bugs,
                    check_mp3_available)
 from webapi import WebApiServer
 
@@ -58,11 +59,26 @@ class AsyncImageLeftWidget(ILeftBody, AsyncImage):
 class ListLineArtist(TwoLineIconListItem):
     artist_dict = DictProperty()
 
+    def __init__(self, *args, **kwargs):
+        kwargs["text"] = font(kwargs["text"])
+        kwargs["secondary_text"] = font(kwargs["secondary_text"])
+        super().__init__(*args, **kwargs)
+
 class ListLineAlbum(TwoLineIconListItem):
     album_dict = DictProperty()
 
+    def __init__(self, *args, **kwargs):
+        kwargs["text"] = font(kwargs["text"])
+        kwargs["secondary_text"] = font(kwargs["secondary_text"])
+        super().__init__(*args, **kwargs)
+
 class ListLineTrack(TwoLineAvatarIconListItem):
     track_dict = DictProperty()
+
+    def __init__(self, *args, **kwargs):
+        kwargs["text"] = font(kwargs["text"])
+        kwargs["secondary_text"] = font(kwargs["secondary_text"])
+        super().__init__(*args, **kwargs)
 
 class WindowManager(ScreenManager):
     pass
@@ -125,6 +141,7 @@ class Neodeemer(MDApp):
         self.theme_cls.accent_palette = "Amber"
         self.theme_cls.accent_hue = "700"
         self.theme_cls.accent_dark_hue = "900"
+        LabelBase.register(name="Regular", fn_regular="fonts/MPLUS1p-Medium.ttf", fn_bold="fonts/MPLUS1p-ExtraBold.ttf")
         self.navigation_menu = self.root.ids.navigation_menu
         self.screen_manager = self.root.ids.screen_manager
         self.screens = [SpotifyScreen(name="SpotifyScreen")]
@@ -442,7 +459,8 @@ class Neodeemer(MDApp):
         self.settings_save(False)
         if len(tracks) > 0:
             label_playlist_info = self.screen_cur.ids.label_playlist_info
-            label_playlist_info.text = "[b]" + tracks[0]["playlist_name"] + "[/b] - [b]" + str(len(tracks)) + "[/b]" + self.loc.get(" songs")
+            label_playlist_info.text = "[b]" + tracks[0]["playlist_name"] + "[/b] - [b]" + str(len(tracks)) + "[/b]" + self.loc.get_r(" songs")
+            label_playlist_info.text = font(label_playlist_info.text)
             return True
         else:
             Clock.schedule_once(partial(self.snackbar_show, self.loc.get("Error while loading playlist")))
@@ -613,9 +631,9 @@ class Neodeemer(MDApp):
         self.download_queue_info["downloaded_b"] = 0
         self.download_queue_info["total_b"] = 0
         self.playlist_queue = []
-        message = self.loc.get("Downloaded ") + str(tracks_count) + self.loc.get(" songs")
+        message = self.loc.get_r("Downloaded ") + str(tracks_count) + self.loc.get_r(" songs")
         if len(self.unavailable_tracks) > 0:
-            message += "\n" + str(len(self.unavailable_tracks)) + self.loc.get(" songs can't be downloaded")
+            message += "\n" + str(len(self.unavailable_tracks)) + self.loc.get_r(" songs can't be downloaded")
             Clock.schedule_once(partial(self.snackbar_show, str(len(self.unavailable_tracks)) + self.loc.get(" songs can't be downloaded")))
             left_action_items = [["alert", lambda x:self.screen_switch("ErrorScreen")]]
             self.toolbar.left_action_items = left_action_items
@@ -623,7 +641,7 @@ class Neodeemer(MDApp):
             icon_path = resource_find("data/icon.ico")
         else:
             icon_path = resource_find("data/icon.png")
-        notification.notify(title=self.loc.get("Download completed"), message=message, app_name=self.loc.TITLE, app_icon=icon_path)
+        notification.notify(title=self.loc.get_r("Download completed"), message=message, app_name=self.loc.TITLE_R, app_icon=icon_path)
     
     def watchdog_webapi(self):
         intent_url = ""
@@ -908,7 +926,7 @@ if __name__ == "__main__":
     if platform == "android":
         from android.storage import primary_external_storage_path
         from android.permissions import Permission, request_permissions
-        settings_folder_path = os.path.join(primary_external_storage_path(), app.loc.TITLE)
+        settings_folder_path = os.path.join(primary_external_storage_path(), app.loc.TITLE_R)
         request_permissions([Permission.WRITE_EXTERNAL_STORAGE, Permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS])
     else:
         settings_folder_path = app.user_data_dir

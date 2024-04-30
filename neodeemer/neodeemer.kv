@@ -123,9 +123,10 @@ MDScreen:
 
             MDTextField:
                 id: text_artists_search
-                hint_text: app.loc.get("Search singers/bands")
+                hint_text: app.loc.get_r("Search singers/bands")
                 font_size: "26sp"
                 on_text_validate: app.load_in_thread(app.artists_load, app.artists_show)
+                font_name: "Regular"
 
         ScrollView:
             MDList:
@@ -144,9 +145,10 @@ MDScreen:
 
             MDTextField:
                 id: text_albums_search
-                hint_text: app.loc.get("Search albums")
+                hint_text: app.loc.get_r("Search albums")
                 font_size: "26sp"
                 on_text_validate: app.load_in_thread(app.albums_load, app.albums_show)
+                font_name: "Regular"
 
         ScrollView:
             id: scrollview
@@ -167,9 +169,10 @@ MDScreen:
 
             MDTextField:
                 id: text_tracks_search
-                hint_text: app.loc.get("Search tracks")
+                hint_text: app.loc.get_r("Search tracks")
                 font_size: "26sp"
                 on_text_validate: app.load_in_thread(app.tracks_load, app.tracks_show)
+                font_name: "Regular"
 
         ScrollView:
             id: scrollview
@@ -221,3 +224,4 @@ MDScreen:
         font_style: "H4"
         theme_text_color: "Custom"
         text_color: app.theme_cls.primary_color
+        markup: True

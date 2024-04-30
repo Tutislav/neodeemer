@@ -2,6 +2,8 @@ from locale import getdefaultlocale
 
 from kivy.utils import platform
 
+from tools import font
+
 
 CZ = {
     #common
@@ -66,7 +68,7 @@ CZ = {
 }
 
 class Localization():
-    TITLE = "Neodeemer"
+    TITLE_R = "Neodeemer"
     LANGUAGES = {
         "en_US": "default",
         "cs_CZ": CZ
@@ -83,6 +85,7 @@ class Localization():
         for lang in self.LANGUAGES.keys():
             if lang == self.system_lang:
                 self.lang = self.system_lang
+        self.TITLE = self.get(self.TITLE_R)
     
     def set_lang(self, lang):
         self.lang = lang
@@ -94,6 +97,9 @@ class Localization():
         return self.system_lang[-2:]
     
     def get(self, text):
+        return font(self.get_r(text))
+
+    def get_r(self, text):
         if self.lang == "en_US":
             return text
         elif text in self.LANGUAGES[self.lang]:

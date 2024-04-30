@@ -30,10 +30,12 @@
 
                     MDLabel:
                         text: app.loc.get("Format")
+                        markup: True
 
                     MDLabel:
                         text: app.loc.get("M4A")
                         halign: "right"
+                        markup: True
 
                     MDSwitch:
                         id: switch_format
@@ -43,6 +45,7 @@
 
                     MDLabel:
                         text: app.loc.get("MP3")
+                        markup: True
 
                     MDBoxLayout:
 
@@ -51,6 +54,7 @@
                         halign: "right"
                         font_style: "Caption"
                         theme_text_color: "Hint"
+                        markup: True
 
                     MDSwitch:
                         width: dp(64)
@@ -60,6 +64,7 @@
                         text: app.loc.get("(Slower download)")
                         font_style: "Caption"
                         theme_text_color: "Hint"
+                        markup: True
 
                 MDGridLayout:
                     cols: 4
@@ -68,6 +73,7 @@
 
                     MDLabel:
                         text: app.loc.get("Create subfolders")
+                        markup: True
 
                     MDBoxLayout:
 
@@ -81,8 +87,9 @@
 
                 MDTextField:
                     id: text_music_folder_path
-                    hint_text: app.loc.get("Music folder")
+                    hint_text: app.loc.get_r("Music folder")
                     on_text_validate: app.music_folder_path_change()
+                    font_name: "Regular"
 
                 MDFillRoundFlatIconButton:
                     text: app.loc.get("Choose folder")
@@ -96,6 +103,7 @@
     
                     MDLabel:
                         text: app.loc.get("Download lyrics")
+                        markup: True
                     
                     MDBoxLayout:
                     
@@ -118,6 +126,7 @@
                     MDLabel:
                         text: app.loc.get("Unsynchronized lyrics")
                         halign: "right"
+                        markup: True
                     
                     MDSwitch:
                         id: switch_lyrics_type
@@ -127,6 +136,7 @@
                     
                     MDLabel:
                         text: app.loc.get("Synchronized lyrics")
+                        markup: True
 
                 MDGridLayout:
                     cols: 4
@@ -135,6 +145,7 @@
     
                     MDLabel:
                         text: app.loc.get("Enable WebApi")
+                        markup: True
                     
                     MDBoxLayout:
                     
@@ -153,7 +164,8 @@
 
                 MDTextField:
                     id: text_localization
-                    hint_text: app.loc.get("Language")
+                    hint_text: app.loc.get_r("Language")
                     on_focus:
                         if self.focus: app.localization_menu.open()
                         if self.focus: Window.release_all_keyboards()
+                    font_name: "Regular"

@@ -24,9 +24,10 @@
 
             MDTextField:
                 id: text_youtube_search
-                hint_text: app.loc.get("Search video name")
+                hint_text: app.loc.get_r("Search video name")
                 font_size: "26sp"
                 on_text_validate: app.load_in_thread(app.youtube_load, app.playlist_show, show_arg2=True)
+                font_name: "Regular"
 
         ScrollView:
             MDSelectionListFix:

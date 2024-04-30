@@ -13,7 +13,7 @@ package.domain = cz.tutislav
 source.dir = .
 
 # (list) Source files to include (let empty to include all the files)
-source.include_exts = py,png,jpg,kv,env,json
+source.include_exts = py,png,jpg,kv,env,json,ttf
 
 # (str) Application versioning (method 2)
 version.regex = __version__ = ['"](.*)['"]

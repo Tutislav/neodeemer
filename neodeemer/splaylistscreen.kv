@@ -24,10 +24,11 @@
 
             MDTextField:
                 id: text_splaylist_id
-                hint_text: app.loc.get("Link or ID of Spotify playlist")
+                hint_text: app.loc.get_r("Link or ID of Spotify playlist")
                 font_size: "26sp"
                 on_text_validate: app.load_in_thread(app.playlist_load, app.tracks_actions_show, show_arg=True, show_arg2=True)
                 on_focus: if self.focus: app.playlist_last_menu_show()
+                font_name: "Regular"
             
             MDLabel:
                 id: label_playlist_info
