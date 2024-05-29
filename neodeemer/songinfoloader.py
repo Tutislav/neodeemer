@@ -247,12 +247,16 @@ class SpotifyLoader(Base):
                     tracks.extend(tracks2["items"])
                     next = tracks2["next"]
                 position = 0
+                playlist_downloaded_count = 0
                 for track in tracks:
                     track2 = track["track"]
                     track_dict = self.track_to_dict(track2)
+                    if track_dict["state"] == TrackStates.COMPLETED:
+                        playlist_downloaded_count += 1
                     track_dict.update({
                         "playlist_name": playlist_name,
-                        "playlist_file_path": playlist_file_path
+                        "playlist_file_path": playlist_file_path,
+                        "playlist_downloaded_count": playlist_downloaded_count
                     })
                     list.append(track_dict)
                     position += 1
@@ -529,11 +533,15 @@ class YoutubeLoader(Base):
                 playlist_file_path = os.path.join(self.music_folder_path, norm(playlist_name, True, True) + ".m3u")
                 tracks = tracks2.videos
                 position = 0
+                playlist_downloaded_count = 0
                 for track in tracks:
                     track_dict = self.track_to_dict(track, True)
+                    if track_dict["state"] == TrackStates.COMPLETED:
+                        playlist_downloaded_count += 1
                     track_dict.update({
                         "playlist_name": playlist_name,
-                        "playlist_file_path": playlist_file_path
+                        "playlist_file_path": playlist_file_path,
+                        "playlist_downloaded_count": playlist_downloaded_count
                     })
                     list.append(track_dict)
                     position += 1

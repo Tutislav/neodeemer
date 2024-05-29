@@ -459,7 +459,8 @@ class Neodeemer(MDApp):
         self.settings_save(False)
         if len(tracks) > 0:
             label_playlist_info = self.screen_cur.ids.label_playlist_info
-            label_playlist_info.text = "[b]" + tracks[0]["playlist_name"] + "[/b] - [b]" + str(len(tracks)) + "[/b]" + self.loc.get_r(" songs")
+            playlist_downloaded_count = tracks[len(tracks) - 1]["playlist_downloaded_count"]
+            label_playlist_info.text = "[b]" + tracks[0]["playlist_name"] + "[/b] - " + str(playlist_downloaded_count) + "/[b]" + str(len(tracks)) + "[/b]" + self.loc.get_r(" songs")
             label_playlist_info.text = font(label_playlist_info.text)
             return True
         else:
