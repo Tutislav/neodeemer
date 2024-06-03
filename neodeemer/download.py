@@ -12,7 +12,7 @@ from tools import HEADERS, TrackStates
 
 
 class Download():
-    def __init__(self, track_dict: dict, spotifyloader: SpotifyLoader, download_queue_info: dict = None, save_lyrics: bool = True, synchronized_lyrics: bool = False):
+    def __init__(self, track_dict: dict, spotifyloader: SpotifyLoader, download_queue_info: dict = None, save_lyrics: bool = True, synchronized_lyrics: bool = False, app_version: float = 0.0):
         self.track_dict = track_dict
         self.spotifyloader = spotifyloader
         if download_queue_info != None:
@@ -27,7 +27,7 @@ class Download():
         self.save_lyrics = save_lyrics
         self.synchronized_lyrics = synchronized_lyrics
         if self.save_lyrics:
-            self.lyrics = Lyrics()
+            self.lyrics = Lyrics(app_version)
         self.download_attempt = 0
         
     def download_on_progress(self, stream=None, chunk=None, bytes_remaining=None):
@@ -103,8 +103,8 @@ class Download():
                             lrc_file_path = os.path.splitext(file_path)[0] + ".lrc"
                             with open(lrc_file_path, "w", encoding="utf-8") as lrc_file:
                                 lrc_file.write(lyrics)
-                except:
-                    pass
+                except Exception as e:
+                    print("Error while getting lyrics for " + self.track_dict["artist_name"] + " - " + self.track_dict["track_name"] + ": " + e)
             mtag.save()
         except:
             self.track_dict["state"] = TrackStates.FOUND

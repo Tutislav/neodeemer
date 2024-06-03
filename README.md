@@ -123,7 +123,7 @@ This app wouldn't be possible to make without these libraries:
 - [ytmusicapi](https://github.com/sigma67/ytmusicapi)
 - [pytube](https://github.com/pytube/pytube)
 - [yt-dlp](https://github.com/yt-dlp/yt-dlp)
-- [Spotify Lyrics API](https://github.com/akashrchandran/spotify-lyrics-api)
+- [LRCLIB](https://github.com/tranxuanthang/lrclib)
 - [music-tag](https://github.com/KristoforMaynard/music-tag)
 - [FFPyPlayer](https://github.com/matham/ffpyplayer)
 - [Plyer](https://github.com/kivy/plyer)

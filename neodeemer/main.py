@@ -541,7 +541,7 @@ class Neodeemer(MDApp):
                 if not track["locked"]:
                     track["locked"] = True
                     if any(state == track["state"] for state in [TrackStates.UNKNOWN, TrackStates.FOUND, TrackStates.SAVED]):
-                        Download(track, self.s, self.download_queue_info, self.save_lyrics, self.synchronized_lyrics).download_track()
+                        Download(track, self.s, self.download_queue_info, self.save_lyrics, self.synchronized_lyrics, __version__).download_track()
                     track["locked"] = False
                 else:
                     continue
@@ -591,7 +591,7 @@ class Neodeemer(MDApp):
                                 self.s.track_find_video_id(track_dict_temp)
                             open_url("https://youtu.be/" + track_dict_temp["video_id"], platform)
                         else:
-                            Download(track_dict_temp, self.s, None, False).download_track()
+                            Download(track_dict_temp, self.s, None, False, __version__).download_track()
                         track_dict["video_id"] = track_dict_temp["video_id"]
                         track_dict["state"] = track_dict_temp["state"]
                 if track_dict_temp["forcedmp3"]:
@@ -618,7 +618,7 @@ class Neodeemer(MDApp):
             self.unavailable_tracks = []
             self.toolbar.left_action_items = []
         for track in self.playlist_queue:
-            Download(track, self.s, self.download_queue_info, False).playlist_file_save()
+            Download(track, self.s, self.download_queue_info, False, __version__).playlist_file_save()
         while self.download_queue_info["position"] != len(self.download_queue):
             Clock.schedule_once(self.progressbar_update)
             sleep(0.5)
