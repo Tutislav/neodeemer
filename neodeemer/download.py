@@ -73,6 +73,17 @@ class Download():
                 if not file_path + "\n" in playlist_file.readlines():
                     playlist_file.write(file_path + "\n")
     
+    def download_synchronized_lyrics(self):
+        if self.track_dict["forcedmp3"]:
+            file_path = self.track_dict["file_path2"]
+        else:
+            file_path = self.track_dict["file_path"]
+        lyrics = self.lyrics.find_lyrics(self.track_dict, self.synchronized_lyrics)
+        if lyrics != "":
+            lrc_file_path = os.path.splitext(file_path)[0] + ".lrc"
+            with open(lrc_file_path, "w", encoding="utf-8") as lrc_file:
+                lrc_file.write(lyrics)
+    
     def save_tags(self):
         self.track_dict["state"] = TrackStates.TAGSAVING
         try:
@@ -98,11 +109,7 @@ class Download():
                 try:
                     mtag["lyrics"] = self.lyrics.find_lyrics(self.track_dict)
                     if self.synchronized_lyrics:
-                        lyrics = self.lyrics.find_lyrics(self.track_dict, self.synchronized_lyrics)
-                        if lyrics != "":
-                            lrc_file_path = os.path.splitext(file_path)[0] + ".lrc"
-                            with open(lrc_file_path, "w", encoding="utf-8") as lrc_file:
-                                lrc_file.write(lyrics)
+                        self.download_synchronized_lyrics()
                 except Exception as e:
                     print("Error while getting lyrics for " + self.track_dict["artist_name"] + " - " + self.track_dict["track_name"] + ": " + e)
             mtag.save()

@@ -48,6 +48,7 @@ CZ = {
     "Only selected": "Jen vybrané",
     #playlist_actions
     "Show": "Zobrazit",
+    "Lyrics only": "Pouze texty",
     #SettingsScreen
     "Format": "Formát",
     "(Better quality)": "(Lepší kvalita)",

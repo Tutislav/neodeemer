@@ -57,6 +57,15 @@
                 text: app.loc.get("Show")
                 icon: "view-list"
                 on_press: app.tracks_actions("show")
+
+            MDFillRoundFlatIconButton:
+                text: app.loc.get("Lyrics only")
+                icon: "text-long"
+                on_press: app.tracks_actions("download_lyrics")
+                visible: int(app.synchronized_lyrics)
+                size_hint_x: 1 if self.visible else 0
+                opacity: 1 if self.visible else 0
+                disabled: not self.visible
             
             MDFillRoundFlatIconButton:
                 text:  app.loc.get("All")

@@ -24,9 +24,9 @@ class LRCLIB():
             lyrics = ""
         elif "syncedLyrics" in data:
             if synchronized:
-                if len(data["syncedLyrics"]) > 0:
+                if data["syncedLyrics"] != None and len(data["syncedLyrics"]) > 0:
                     lyrics = data["syncedLyrics"]
             else:
-                if len(data["plainLyrics"]) > 0:
+                if data["plainLyrics"] != None and len(data["plainLyrics"]) > 0:
                     lyrics = data["plainLyrics"]
         return lyrics

@@ -128,6 +128,7 @@ class Neodeemer(MDApp):
         "total_b": 0
     }
     playlist_queue = []
+    lyrics_queue = []
     unavailable_tracks = []
     intent_url = ""
     sound = None
@@ -510,12 +511,14 @@ class Neodeemer(MDApp):
         self.loading.open()
         Thread(target=load, name="data_load").start()
     
-    def download(self, selected_tracks=None):
+    def download(self, selected_tracks=None, lyrics_only=False):
         if selected_tracks != None:
             self.selected_tracks = selected_tracks
         for track in self.selected_tracks:
-            if track["state"] != TrackStates.COMPLETED:
+            if track["state"] != TrackStates.COMPLETED and not lyrics_only:
                 self.download_queue.append(track)
+            elif track["state"] == TrackStates.COMPLETED and lyrics_only:
+                self.lyrics_queue.append(track)
             else:
                 self.playlist_queue.append(track)
         self.selected_tracks = []
@@ -619,6 +622,8 @@ class Neodeemer(MDApp):
             self.toolbar.left_action_items = []
         for track in self.playlist_queue:
             Download(track, self.s, self.download_queue_info, False, __version__).playlist_file_save()
+        for track in self.lyrics_queue:
+            Download(track, self.s, self.download_queue_info, True, True, __version__).download_synchronized_lyrics()
         while self.download_queue_info["position"] != len(self.download_queue):
             Clock.schedule_once(self.progressbar_update)
             sleep(0.5)
@@ -632,6 +637,7 @@ class Neodeemer(MDApp):
         self.download_queue_info["downloaded_b"] = 0
         self.download_queue_info["total_b"] = 0
         self.playlist_queue = []
+        self.lyrics_queue = []
         message = self.loc.get_r("Downloaded ") + str(tracks_count) + self.loc.get_r(" songs")
         if len(self.unavailable_tracks) > 0:
             message += "\n" + str(len(self.unavailable_tracks)) + self.loc.get_r(" songs can't be downloaded")
@@ -767,6 +773,8 @@ class Neodeemer(MDApp):
                 self.download(self.screen_cur.tracks)
         elif action == "download_selected":
             self.download()
+        elif action == "download_lyrics":
+            self.download(self.screen_cur.tracks, True)
         elif action == "show":
             self.playlist_show(self.screen_cur.page, youtube)
     
