@@ -12,6 +12,11 @@
 Spotify/YouTube song downloader with option to download whole albums, playlists and also lyrics.\
 Available on [**Android**](#installation), [**Windows**](#installation) and [**Linux***](#running-from-source "You must run it from source").
 
+> [!IMPORTANT]
+> YouTube recently started blocking IP adresses, when you download too much videos as described in https://github.com/yt-dlp/yt-dlp/issues/3766. \
+> It looks like bans are temporary and doesn't apply to logged users in browser.\
+> So if you are downloading large playlist and download suddenly stops working , just try it later.
+
 ## **[▶Download latest release◀](https://github.com/Tutislav/neodeemer/releases/latest)**
 
 ## Features
@@ -23,7 +28,7 @@ Available on [**Android**](#installation), [**Windows**](#installation) and [**L
 - Automatically save track name, artist name, album image and other tags to songs
 - Lyrics - embedded directly to audio files
 - Synchronized lyrics - saved to `.lrc` files
-- Change audio format - `m4a` or `mp3`
+- ~~Change audio format - `m4a` or `mp3`~~ - only m4a audio format is available right now
 - [Browser Extension](#browser-extension) - download music directly from YouTube video page
 
 ## Screenshots
