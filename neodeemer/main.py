@@ -891,8 +891,8 @@ class Neodeemer(MDApp):
             with open(self.settings_file_path, "r") as settings_file:
                 data = json.load(settings_file)
                 self.music_folder_path = data["music_folder_path"]
-                if "format_mp3" in data:
-                    self.format_mp3 = data["format_mp3"]
+                #if "format_mp3" in data:
+                #    self.format_mp3 = data["format_mp3"]
                 self.create_subfolders = data["create_subfolders"]
                 if "save_lyrics" in data:
                     self.save_lyrics = data["save_lyrics"]
@@ -911,7 +911,7 @@ class Neodeemer(MDApp):
         with open(self.settings_file_path, "w") as settings_file:
             data = {
                 "music_folder_path": self.music_folder_path,
-                "format_mp3": self.format_mp3,
+                #"format_mp3": self.format_mp3,
                 "create_subfolders": self.create_subfolders,
                 "save_lyrics": self.save_lyrics,
                 "synchronized_lyrics": self.synchronized_lyrics,

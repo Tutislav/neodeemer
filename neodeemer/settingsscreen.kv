@@ -42,10 +42,12 @@
                         active: app.format_mp3
                         width: dp(64)
                         on_active: app.format_change()
+                        disabled: True
 
                     MDLabel:
                         text: app.loc.get("MP3")
                         markup: True
+                        theme_text_color: "Hint"
 
                     MDBoxLayout:
 

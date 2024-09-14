@@ -51,10 +51,10 @@ class TestSearchDownload(unittest.TestCase):
     def test_e_cleanup(self):
         shutil.rmtree(self.music_folder_path)
 
-    def test_f_download_mp3(self):
-        for track in self.tracks2:
-            Download(track, self.s, None).download_track()
-            self.assertEqual(track_file_state(track).value, TrackStates.COMPLETED.value, "Download mp3 error: " + str(track))
+    #def test_f_download_mp3(self):
+    #    for track in self.tracks2:
+    #        Download(track, self.s, None).download_track()
+    #        self.assertEqual(track_file_state(track).value, TrackStates.COMPLETED.value, "Download mp3 error: " + str(track))
 
     def test_z_cleanup(self):
         shutil.rmtree(self.music_folder_path)
