@@ -256,9 +256,12 @@ def open_url(url, platform):
 
 def check_update_available(current_version):
     url = "https://api.github.com/repos/Tutislav/neodeemer/releases"
-    urldata = requests.get(url)
-    data = urldata.json()
-    new_version = data[0]["tag_name"]
+    try:
+        urldata = requests.get(url)
+        data = urldata.json()
+        new_version = data[0]["tag_name"]
+    except:
+        new_version = current_version
     return new_version != current_version
 
 def check_mp3_available(track_dict):

@@ -184,11 +184,14 @@ class SpotifyLoader(Base):
     def tracks_search(self, track_name, page=0):
         list = []
         if len(track_name) > 0:
-            limit, offset = self.limit_offset(page)
-            tracks = self.spotify.search(track_name, type="track", limit=limit, offset=offset, market=self.market)
-            tracks = tracks["tracks"]["items"]
-            for track in tracks:
-                list.append(self.track_to_dict(track))
+            try:
+                limit, offset = self.limit_offset(page)
+                tracks = self.spotify.search(track_name, type="track", limit=limit, offset=offset, market=self.market)
+                tracks = tracks["tracks"]["items"]
+                for track in tracks:
+                    list.append(self.track_to_dict(track))
+            except:
+                pass
         return list
     
     def artist(self, artist_id):
