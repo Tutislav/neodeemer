@@ -12,5 +12,5 @@
     },
     "preferred_channels": ["rhino", "vevo", "warner", "watertower", "bandzonecz", "afm records"],
     "excluded_channels": ["songs_cz", "cumizgum", "forever runandplay", "travelguy"],
-    "excluded_words": ["fest", "tour", "filmed", "live", "cover", "remix", "drum version", "full album", "trailer", "news", "arena", "koncert", "koncertu", "konzertu", "zaznam koncertu", "zivak", "festival", "cele album"]
+    "excluded_words": ["fest", "tour", "filmed", "live", "cover", "remix", "drum version", "full album", "trailer", "news", "arena", "koncert", "koncertu", "konzertu", "zaznam koncertu", "zive", "zivak", "festival", "cele album"]
 }

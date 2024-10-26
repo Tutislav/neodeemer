@@ -18,6 +18,7 @@ CZ = {
     "Error while loading playlist": "Chyba při načítání playlistu",
     "Error while playing track": "Chyba při přehrávání skladby",
     "Not available on YouTube": "Není na YouTube",
+    "Video is age restricted on YouTube": "Video je omezeno věkem na YouTube",
     "Error while downloading": "Chyba při stahování",
     #navigation_menu
     "Spotify search": "Vyhledávání na Spotify",

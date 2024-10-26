@@ -298,6 +298,7 @@ class SpotifyLoader(Base):
         max_results = 5
         text = track_dict["artist_name"] + " " + track_dict["track_name"]
         video_id = None
+        age_restricted = False
         try:
             with YTMusic() as ytmusic:
                 tracks = ytmusic.search(text, "songs")
@@ -373,6 +374,12 @@ class SpotifyLoader(Base):
                     self.video_get_details(video)
                     video_description = video["video_description"]
                     video_details = video["video_details"]
+                    if "contentRating" in video_details:
+                        content_rating = video_details["contentRating"]
+                        if "ytRating" in content_rating:
+                            if content_rating["ytRating"] == "ytAgeRestricted":
+                                age_restricted = True
+                                continue
                     if contains_artist_track(video_title, artist_name2, track_name3) or contains_artist_track(video_channel, artist_name2) or contains_artist_track(video_description, artist_name2):
                         if contains_artist_track(video_title, track_name=track_name3):
                             priority = 5
@@ -410,7 +417,10 @@ class SpotifyLoader(Base):
                 if len(suitable_videos) > 0:
                     video_id = suitable_videos[0][0]["id"]
                 else:
-                    track_dict["reason"] = "Not available on YouTube"
+                    if age_restricted:
+                        track_dict["reason"] = "Video is age restricted on YouTube"
+                    else:
+                        track_dict["reason"] = "Not available on YouTube"
                     track_dict["state"] = TrackStates.UNAVAILABLE
         if video_id != None:
             track_dict["video_id"] = video_id
