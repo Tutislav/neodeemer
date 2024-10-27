@@ -29,6 +29,7 @@ Available on [**Android**](#installation), [**Windows**](#installation) and [**L
 - Lyrics - embedded directly to audio files
 - Synchronized lyrics - saved to `.lrc` files
 - ~~Change audio format - `m4a` or `mp3`~~ - only m4a audio format is available right now
+- ~~Download age restricted videos~~ - not available right now
 - [Browser Extension](#browser-extension) - download music directly from YouTube video page
 
 ## Screenshots
@@ -128,6 +129,7 @@ This app wouldn't be possible to make without these libraries:
 - [ytmusicapi](https://github.com/sigma67/ytmusicapi)
 - [pytube](https://github.com/pytube/pytube)
 - [yt-dlp](https://github.com/yt-dlp/yt-dlp)
+- [Poke](https://github.com/ashley0143/poke)
 - [LRCLIB](https://github.com/tranxuanthang/lrclib)
 - [music-tag](https://github.com/KristoforMaynard/music-tag)
 - [FFPyPlayer](https://github.com/matham/ffpyplayer)

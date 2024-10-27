@@ -164,6 +164,12 @@ class Download():
             self.download_file(youtube_video.url, self.track_dict["file_path"])
         self.track_dict["state"] = TrackStates.SAVED
     
+    def download_m4a_poke(self):
+        url = "https://poketube.fun/api/video/download?v=" + self.track_dict["video_id"] + "&q=140&f=webm"
+        self.track_dict["state"] = TrackStates.DOWNLOADING
+        self.download_file(url, self.track_dict["file_path"], False)
+        self.track_dict["state"] = TrackStates.SAVED
+
     def download_mp3_neodeemer(self):
         raise
         track_dict_temp = {}
@@ -197,13 +203,17 @@ class Download():
                             self.delete_broken_files()
                             self.download_m4a_pytube()
                         except:
-                            self.delete_broken_files()
-                            if not self.spotifyloader.format_mp3:
-                                self.track_dict["state"] = TrackStates.FOUND
-                                self.track_dict["forcedmp3"] = True
-                            else:
-                                self.track_dict["state"] = TrackStates.UNAVAILABLE
-                                self.track_dict["reason"] = "Error while downloading"
+                            try:
+                                self.delete_broken_files()
+                                self.download_m4a_poke()
+                            except:
+                                self.delete_broken_files()
+                                if not self.spotifyloader.format_mp3:
+                                    self.track_dict["state"] = TrackStates.FOUND
+                                    self.track_dict["forcedmp3"] = True
+                                else:
+                                    self.track_dict["state"] = TrackStates.UNAVAILABLE
+                                    self.track_dict["reason"] = "Error while downloading"
                 else:
                     try:
                         self.delete_broken_files()
